@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+/* ── Theme tokens ──────────────────────────────────────────────
+   Default theme: "Royal Bible". Add new themes by copying the
+   [data-theme] block and registering the id in src/lib/themes.ts. */
+:root,
+[data-theme="royal-bible"] {
+  --bbl-bg: #131035;
+  --bbl-bg-accent: #2a1b5e;
+  --bbl-card: #1e1847;
+  --bbl-card-border: #3d2f7a;
+  --bbl-text: #f5f1e6;
+  --bbl-text-muted: #b6aed6;
+  --bbl-gold: #e8b64c;
+  --bbl-gold-soft: #8a6a2a;
+  --bbl-primary: #7c5cff;
+  --bbl-primary-soft: #4c3a99;
+  --bbl-correct: #34d399;
+  --bbl-incorrect: #f87171;
+}
+
+@theme inline {
+  --color-bbl-bg: var(--bbl-bg);
+  --color-bbl-bg-accent: var(--bbl-bg-accent);
+  --color-bbl-card: var(--bbl-card);
+  --color-bbl-border: var(--bbl-card-border);
+  --color-bbl-text: var(--bbl-text);
+  --color-bbl-muted: var(--bbl-text-muted);
+  --color-bbl-gold: var(--bbl-gold);
+  --color-bbl-gold-soft: var(--bbl-gold-soft);
+  --color-bbl-primary: var(--bbl-primary);
+  --color-bbl-primary-soft: var(--bbl-primary-soft);
+  --color-bbl-correct: var(--bbl-correct);
+  --color-bbl-incorrect: var(--bbl-incorrect);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -10%, var(--bbl-bg-accent), transparent),
+    var(--bbl-bg);
+  color: var(--bbl-text);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  min-height: 100vh;
+}
+
+/* Visible focus for keyboard users */
+:focus-visible {
+  outline: 3px solid var(--bbl-gold);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Reduced motion: kill all animation regardless of source.
+   The in-app setting adds [data-reduced-motion="true"] on <html>. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+[data-reduced-motion="true"] *,
+[data-reduced-motion="true"] *::before,
+[data-reduced-motion="true"] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+/* Gentle floating for background decorations */
+@keyframes bbl-float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(3deg);
+  }
+}
+.bbl-float {
+  animation: bbl-float 7s ease-in-out infinite;
+}
+
+/* Subtle glow for gold accents */
+.bbl-glow-gold {
+  text-shadow: 0 0 24px rgba(232, 182, 76, 0.45);
+}
+
+/* Correct answer pulse */
+@keyframes bbl-correct-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+  }
+  100% {
+    box-shadow: 0 0 0 16px rgba(52, 211, 153, 0);
+  }
+}
+.bbl-correct-pulse {
+  animation: bbl-correct-pulse 0.9s ease-out 2;
+}
+
+/* Incorrect shake (used sparingly) */
+@keyframes bbl-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+.bbl-shake {
+  animation: bbl-shake 0.3s ease-in-out 1;
+}
+
+/* Confetti pieces */
+@keyframes bbl-confetti-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(110vh) rotate(720deg);
+    opacity: 0.7;
+  }
+}
+.bbl-confetti {
+  animation: bbl-confetti-fall linear forwards;
+}
