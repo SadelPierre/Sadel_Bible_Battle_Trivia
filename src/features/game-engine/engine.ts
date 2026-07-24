@@ -16,7 +16,14 @@ import type {
   GameState,
   PlayerScoreState,
 } from "@/types/game";
+import { DUEL_FINALISTS } from "@/types/game";
 import { rankPlayers, scoreAnswer, winners } from "@/features/scoring/scoring";
+import {
+  applyTournamentReveal,
+  buildSurvivorSchedule,
+  tournamentComplete,
+  tournamentWinnerIds,
+} from "@/features/tournament/tournament";
 
 export const COUNTDOWN_MS = 3000;
 /** grace window for online latency: answers arriving slightly late still count */
@@ -65,6 +72,30 @@ export function createGame(
   };
 }
 
+/**
+ * A tournament game is an ordinary game seeded with tournament state: a survivor
+ * schedule sized to the field, and (for tiny fields) an immediate duel stage.
+ */
+export function createTournamentGame(
+  settings: GameSettings,
+  players: GamePlayer[],
+  questions: BibleQuestion[],
+  now: number,
+): GameState {
+  const base = createGame(settings, players, questions, now);
+  const startCount = players.length;
+  return {
+    ...base,
+    tournament: {
+      stage: startCount <= DUEL_FINALISTS ? "duel" : "field",
+      eliminatedAtIndex: {},
+      survivorSchedule: buildSurvivorSchedule(startCount),
+      duelWins: {},
+      championId: null,
+    },
+  };
+}
+
 function startQuestion(state: GameState, now: number): GameState {
   return {
     ...state,
@@ -83,10 +114,11 @@ export function currentQuestion(state: GameState): BibleQuestion {
   return q;
 }
 
-/** Every connected human + every bot has answered? */
+/** Every connected human + every bot has answered? Eliminated players don't count. */
 export function allAnswered(state: GameState): boolean {
   return state.players
     .filter((p) => p.isBot || p.connected)
+    .filter((p) => state.tournament == null || state.tournament.eliminatedAtIndex[p.id] === undefined)
     .every((p) => state.pendingAnswers[p.id] !== undefined);
 }
 
@@ -96,6 +128,8 @@ function applyReveal(state: GameState, now: number): GameState {
   const scores: Record<string, PlayerScoreState> = { ...state.scores };
 
   for (const player of state.players) {
+    // In a tournament, stop scoring players eliminated in a previous round.
+    if (state.tournament && state.tournament.eliminatedAtIndex[player.id] !== undefined) continue;
     const prev = scores[player.id] ?? createInitialScore(state.questions.length);
     const pending = state.pendingAnswers[player.id];
     const record = scoreAnswer({
@@ -120,13 +154,16 @@ function applyReveal(state: GameState, now: number): GameState {
     };
   }
 
-  return {
+  const revealed: GameState = {
     ...state,
     phase: "reveal",
     scores,
     questionDeadline: null,
     phaseEndsAt: now + state.settings.revealSeconds * 1000,
   };
+  // Tournaments compute eliminations / duel outcomes on the reveal, so the
+  // reveal screen can show who survived and who is out.
+  return revealed.tournament ? applyTournamentReveal(revealed) : revealed;
 }
 
 /**
@@ -144,6 +181,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       if (state.phase !== "question") return state;
       const { playerId, answerIndex, now } = action;
       if (!state.players.some((p) => p.id === playerId)) return state;
+      // eliminated players are spectators — they can't submit
+      if (state.tournament && state.tournament.eliminatedAtIndex[playerId] !== undefined) return state;
       // one answer per player per question
       if (state.pendingAnswers[playerId] !== undefined) return state;
       if (answerIndex < 0 || answerIndex > 3) return state;
@@ -169,6 +208,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "ADVANCE": {
       const { now } = action;
       if (state.phase === "reveal") {
+        // Tournaments have no round-summary: the elimination reveal is the
+        // summary. Advance straight to the next question, or crown the champion.
+        if (state.tournament) {
+          const outOfQuestions = state.currentIndex >= state.questions.length - 1;
+          if (tournamentComplete(state) || outOfQuestions) {
+            return {
+              ...state,
+              phase: "complete",
+              phaseEndsAt: null,
+              winnerIds: tournamentWinnerIds(state),
+            };
+          }
+          return startQuestion({ ...state, currentIndex: state.currentIndex + 1 }, now);
+        }
         const isLast = state.currentIndex >= state.questions.length - 1;
         if (isLast) {
           const ranked = rankPlayers(state.players, state.scores);

@@ -15,7 +15,9 @@ const bodySchema = z.object({
   avatar: avatarSchema,
   color: colorSchema,
   sessionId: z.string().uuid(),
-  maxPlayers: z.number().int().min(2).max(4).default(4),
+  // Upper bound is the tournament cap; createRoom clamps to the per-mode range.
+  maxPlayers: z.number().int().min(2).max(30).default(4),
+  mode: z.enum(["online", "tournament"]).default("online"),
 });
 
 export async function POST(req: Request) {
@@ -36,6 +38,7 @@ export async function POST(req: Request) {
     const result = await createRoom(
       { name: body.name, avatar: body.avatar, color: body.color, sessionId: body.sessionId },
       body.maxPlayers,
+      body.mode,
     );
     return NextResponse.json(result);
   } catch (err) {

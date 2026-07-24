@@ -190,6 +190,38 @@ export type GamePhase =
   | "round-summary"
   | "complete";
 
+// ── Tournament: survival elimination with a head-to-head duel final ─────────
+
+export type GameMode = "online" | "tournament";
+
+export const MAX_TOURNAMENT_PLAYERS = 30;
+/** below this a survival field is pointless — just play a normal online game */
+export const MIN_TOURNAMENT_PLAYERS = 3;
+/** the field is cut down to this many finalists, who then play a sudden-death duel */
+export const DUEL_FINALISTS = 2;
+/** the duel is decided by outright question wins (not cumulative score): first to this many */
+export const DUEL_WINS_TO_WIN = 2;
+
+/** "field" = the whole surviving pack answers together; "duel" = the final two head-to-head */
+export type TournamentStage = "field" | "duel";
+
+export type TournamentState = {
+  stage: TournamentStage;
+  /** playerId → question index at which they were eliminated; survivors are absent */
+  eliminatedAtIndex: Record<string, number>;
+  /**
+   * Target number of survivors remaining AFTER each field-stage elimination.
+   * Computed once at game creation, strictly decreasing down to DUEL_FINALISTS,
+   * and indexed by the number of elimination questions already resolved. Storing
+   * the whole curve keeps convergence deterministic and inspectable.
+   */
+  survivorSchedule: number[];
+  /** duel sudden-death: outright question wins per finalist, keyed by player id */
+  duelWins: Record<string, number>;
+  /** the crowned champion once the duel resolves */
+  championId: string | null;
+};
+
 export type PendingAnswer = { answerIndex: number; responseMs: number; submittedAt: number };
 
 export type GameState = {
@@ -210,6 +242,8 @@ export type GameState = {
   /** completed a full pass through the current round-summary? */
   roundJustEnded: number | null;
   winnerIds: string[] | null;
+  /** present only in tournament games; drives survival elimination + the duel final */
+  tournament?: TournamentState | null;
 };
 
 export type RankedPlayer = {

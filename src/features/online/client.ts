@@ -57,13 +57,23 @@ export function clearCredentials(code: string): void {
 
 export type IdentityInput = { name: string; avatar: string; color: string };
 
-export async function createRoomApi(identity: IdentityInput): Promise<JoinResult> {
+export async function createRoomApi(
+  identity: IdentityInput,
+  opts?: { mode?: "online" | "tournament"; maxPlayers?: number },
+): Promise<JoinResult> {
+  const mode = opts?.mode ?? "online";
+  const maxPlayers = opts?.maxPlayers ?? (mode === "tournament" ? 30 : 4);
   const result = await api<JoinResult>("/api/rooms", {
     method: "POST",
-    body: JSON.stringify({ ...identity, sessionId: getSessionId(), maxPlayers: 4 }),
+    body: JSON.stringify({ ...identity, sessionId: getSessionId(), maxPlayers, mode }),
   });
   saveCredentials(result.code, { playerId: result.playerId, token: result.token });
   return result;
+}
+
+/** Create a knockout tournament room (survival elimination + duel final, up to 30). */
+export function createTournamentApi(identity: IdentityInput): Promise<JoinResult> {
+  return createRoomApi(identity, { mode: "tournament" });
 }
 
 export async function joinRoomApi(code: string, identity: IdentityInput): Promise<JoinResult> {

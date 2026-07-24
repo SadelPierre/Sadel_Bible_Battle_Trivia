@@ -22,26 +22,32 @@ import { supabaseAdmin } from "@/lib/supabase/admin";
 import {
   allAnswered,
   createGame,
+  createTournamentGame,
   currentQuestion,
   gameReducer,
   LATE_GRACE_MS,
 } from "@/features/game-engine/engine";
+import { buildSurvivorSchedule } from "@/features/tournament/tournament";
 import { planBotAnswer, botName } from "@/features/computer-players/bots";
 import { selectQuestions } from "@/features/questions/select";
 import { QUESTION_BANK } from "@/features/questions/bank";
 import { generateRoomCode, sanitizeName } from "@/lib/validation";
 import {
   DEFAULT_SETTINGS,
+  DUEL_WINS_TO_WIN,
+  MAX_TOURNAMENT_PLAYERS,
+  MIN_TOURNAMENT_PLAYERS,
   PLAYER_AVATARS,
   PLAYER_COLORS,
   type BotDifficulty,
+  type GameMode,
   type GamePlayer,
   type GameSettings,
   type GameState,
   type PlayerAvatar,
   type PlayerColor,
 } from "@/types/game";
-import type { GameSnapshot, RoomSnapshot, SnapshotPlayer } from "./types";
+import type { GameSnapshot, RoomSnapshot, SnapshotPlayer, TournamentSnapshot } from "./types";
 
 const CONNECTED_WINDOW_MS = 20_000; // heartbeat freshness → "connected"
 const HOST_MIGRATE_AFTER_MS = 45_000;
@@ -62,6 +68,7 @@ type RoomRow = {
   room_code: string;
   host_player_id: string | null;
   status: string;
+  game_mode: GameMode;
   max_players: number;
   settings: GameSettings;
   current_game_id: string | null;
@@ -95,11 +102,21 @@ type GameDoc = {
   usedQuestionIds: string[];
 };
 
+/** A row from the contention-free tournament answer inbox, awaiting a fold. */
+type InboxRow = {
+  player_id: string;
+  answer_index: number;
+  response_ms: number;
+  submitted_at: string;
+};
+
 type Ctx = {
   db: SupabaseClient;
   room: RoomRow;
   players: PlayerRow[];
   gameDoc: GameDoc | null;
+  /** tournament answers for the current live question, drained at load time */
+  inboxAnswers: InboxRow[];
   gameDirty: boolean;
   roomDirty: boolean;
 };
@@ -153,11 +170,31 @@ async function loadCtx(db: SupabaseClient, code: string): Promise<Ctx> {
       .maybeSingle();
     if (game?.state) gameDoc = game.state as GameDoc;
   }
+
+  // For a live tournament question, pull the inbox so the settle pass can fold
+  // the answers into authoritative state in one batched commit. Reading the
+  // inbox never touches game_rooms.version, so the answer write path stays
+  // contention-free no matter how many players submit at once.
+  let inboxAnswers: InboxRow[] = [];
+  if (
+    room.game_mode === "tournament" &&
+    room.current_game_id &&
+    gameDoc &&
+    gameDoc.engine.phase === "question"
+  ) {
+    const { data: rows } = await db.rpc("drain_tournament_answers", {
+      p_game_id: room.current_game_id,
+      p_question_index: gameDoc.engine.currentIndex,
+    });
+    if (rows) inboxAnswers = rows as InboxRow[];
+  }
+
   return {
     db,
     room: room as RoomRow,
     players: (players ?? []) as PlayerRow[],
     gameDoc,
+    inboxAnswers,
     gameDirty: false,
     roomDirty: false,
   };
@@ -281,6 +318,30 @@ function settleGame(ctx: Ctx, now: number): void {
     }
 
     if (engine.phase === "question") {
+      // Fold any inbox answers (tournament humans) into authoritative state.
+      // Idempotent: already-folded players are skipped, so racing settle passes
+      // converge on the same pendingAnswers set.
+      if (ctx.inboxAnswers.length > 0) {
+        const pending = { ...engine.pendingAnswers };
+        let folded = false;
+        for (const row of ctx.inboxAnswers) {
+          if (pending[row.player_id] !== undefined) continue;
+          if (!engine.players.some((p) => p.id === row.player_id)) continue;
+          if (engine.tournament?.eliminatedAtIndex[row.player_id] !== undefined) continue;
+          pending[row.player_id] = {
+            answerIndex: row.answer_index,
+            responseMs: row.response_ms,
+            submittedAt: new Date(row.submitted_at).getTime(),
+          };
+          folded = true;
+        }
+        if (folded) {
+          engine = { ...engine, pendingAnswers: pending };
+          doc.engine = engine;
+          ctx.gameDirty = true;
+          changed = true;
+        }
+      }
       planBots(ctx, now);
       // apply bot answers that are due
       const plans = doc.botPlans;
@@ -417,8 +478,15 @@ function playerInsertError(error: { code?: string; message: string }): RoomError
 
 export type Identity = { name: string; avatar: string; color: string; sessionId: string };
 
-export async function createRoom(identity: Identity, maxPlayers: number) {
+export async function createRoom(
+  identity: Identity,
+  maxPlayers: number,
+  mode: GameMode = "online",
+) {
   const db = supabaseAdmin();
+  const floor = mode === "tournament" ? MIN_TOURNAMENT_PLAYERS : 2;
+  const cap = mode === "tournament" ? MAX_TOURNAMENT_PLAYERS : 4;
+  const clampedMax = Math.min(cap, Math.max(floor, maxPlayers));
   // retry on the (unlikely) code collision
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = generateRoomCode();
@@ -427,7 +495,8 @@ export async function createRoom(identity: Identity, maxPlayers: number) {
       .insert({
         room_code: code,
         status: "lobby",
-        max_players: Math.min(4, Math.max(2, maxPlayers)),
+        game_mode: mode,
+        max_players: clampedMax,
         settings: DEFAULT_SETTINGS,
       })
       .select("*")
@@ -647,10 +716,19 @@ export async function removePlayer(
 }
 
 function beginGame(ctx: Ctx, now: number, excludeIds: string[]): void {
-  const settings = { ...DEFAULT_SETTINGS, ...ctx.room.settings };
-  const questions = selectQuestions(QUESTION_BANK, settings, new Set(excludeIds));
+  const isTournament = ctx.room.game_mode === "tournament";
   const players = ctx.players.map((p) => toGamePlayer(p, now));
-  const engine = createGame(settings, players, questions, now);
+  let settings = { ...DEFAULT_SETTINGS, ...ctx.room.settings };
+  if (isTournament) {
+    // A tournament must have enough questions for every field cut plus a
+    // full-length duel, and never breaks for a round summary.
+    const needed = buildSurvivorSchedule(players.length).length + DUEL_WINS_TO_WIN * 2 + 2;
+    settings = { ...settings, questionCount: Math.max(settings.questionCount, needed), roundSize: 0 };
+  }
+  const questions = selectQuestions(QUESTION_BANK, settings, new Set(excludeIds));
+  const engine = isTournament
+    ? createTournamentGame(settings, players, questions, now)
+    : createGame(settings, players, questions, now);
   ctx.gameDoc = {
     engine,
     botPlans: null,
@@ -665,17 +743,31 @@ export async function startGame(code: string, playerId: string, token: string) {
   return withRoom(code, async (ctx, now) => {
     requireHost(ctx, playerId, token);
     if (ctx.room.status !== "lobby") throw new RoomError("Game already started.", 409, "already_started");
-    const humans = ctx.players.filter((p) => !p.is_computer);
-    if (ctx.players.length < 2) {
-      throw new RoomError("You need at least 2 players (add a computer player?).", 400, "not_enough_players");
-    }
-    const notReady = humans.filter((p) => !p.is_ready && p.id !== ctx.room.host_player_id);
-    if (notReady.length > 0) {
-      throw new RoomError(
-        `Waiting for: ${notReady.map((p) => p.display_name).join(", ")}`,
-        409,
-        "not_ready",
-      );
+
+    if (ctx.room.game_mode === "tournament") {
+      // A large field can't wait on everyone tapping Ready — the host starts the
+      // bracket once enough players have joined. Anyone still in the lobby at
+      // start is simply in the field.
+      if (ctx.players.length < MIN_TOURNAMENT_PLAYERS) {
+        throw new RoomError(
+          `A tournament needs at least ${MIN_TOURNAMENT_PLAYERS} players.`,
+          400,
+          "not_enough_players",
+        );
+      }
+    } else {
+      const humans = ctx.players.filter((p) => !p.is_computer);
+      if (ctx.players.length < 2) {
+        throw new RoomError("You need at least 2 players (add a computer player?).", 400, "not_enough_players");
+      }
+      const notReady = humans.filter((p) => !p.is_ready && p.id !== ctx.room.host_player_id);
+      if (notReady.length > 0) {
+        throw new RoomError(
+          `Waiting for: ${notReady.map((p) => p.display_name).join(", ")}`,
+          409,
+          "not_ready",
+        );
+      }
     }
     // The atomic commit RPC creates this row together with the room transition.
     ctx.room.current_game_id = randomUUID();
@@ -689,10 +781,48 @@ export async function submitAnswer(
   token: string,
   answerIndex: number,
 ) {
-  return withRoom(code, (ctx, now) => {
+  const db = supabaseAdmin();
+  const ctx = await loadCtx(db, code);
+
+  // Tournament: write to the answer inbox instead of mutating the room. This is
+  // the one path that must scale to 30 simultaneous submitters, so it never
+  // touches game_rooms.version — the settle pass folds these in later.
+  if (ctx.room.game_mode === "tournament") {
+    const now = Date.now();
     const me = requirePlayer(ctx, playerId, token);
-    if (!ctx.gameDoc) throw new RoomError("No game in progress.", 409, "no_game");
-    const before = ctx.gameDoc.engine;
+    const doc = ctx.gameDoc;
+    if (!doc) throw new RoomError("No game in progress.", 409, "no_game");
+    // Advance authoritative time in memory (not persisted) so timing is accurate
+    // even if no poll has settled the countdown→question transition yet.
+    settleGame(ctx, now);
+    const engine = doc.engine;
+    if (engine.phase !== "question") return; // not accepting answers right now
+    if (engine.tournament?.eliminatedAtIndex[me.id] !== undefined) {
+      throw new RoomError("You have been eliminated — you're spectating now.", 409, "eliminated");
+    }
+    if (answerIndex < 0 || answerIndex > 3) throw new RoomError("Invalid answer.", 400, "bad_answer");
+    const started = engine.questionStartedAt ?? now;
+    const deadline = engine.questionDeadline ?? now;
+    if (now > deadline + LATE_GRACE_MS) return; // too late — silently ignore
+    const responseMs = Math.max(0, Math.min(now - started, engine.settings.timerSeconds * 1000));
+    const { error } = await ctx.db.rpc("submit_tournament_answer", {
+      p_room_id: ctx.room.id,
+      p_game_id: ctx.room.current_game_id,
+      p_question_index: engine.currentIndex,
+      p_player_id: me.id,
+      p_answer_index: answerIndex,
+      p_response_ms: responseMs,
+    });
+    if (error) throw new RoomError(error.message, 500, "db_error");
+    return;
+  }
+
+  // Normal online (≤4 players): version-checked mutation with a settle pass, so
+  // reveal happens instantly once everyone has answered.
+  return withRoom(code, (c, now) => {
+    const me = requirePlayer(c, playerId, token);
+    if (!c.gameDoc) throw new RoomError("No game in progress.", 409, "no_game");
+    const before = c.gameDoc.engine;
     const after = gameReducer(before, {
       type: "SUBMIT_ANSWER",
       playerId: me.id,
@@ -700,10 +830,9 @@ export async function submitAnswer(
       now,
     });
     if (after !== before) {
-      ctx.gameDoc.engine = after;
-      ctx.gameDirty = true;
-      // if everyone has now answered, reveal immediately
-      settleGame(ctx, now);
+      c.gameDoc.engine = after;
+      c.gameDirty = true;
+      settleGame(c, now);
     }
   });
 }
@@ -798,6 +927,25 @@ function buildSnapshot(
             isReviewed: q.isReviewed,
           }
       : null;
+    let tournament: TournamentSnapshot | null = null;
+    if (engine.tournament) {
+      const t = engine.tournament;
+      const survivorCount = engine.players.filter(
+        (p) => t.eliminatedAtIndex[p.id] === undefined,
+      ).length;
+      tournament = {
+        stage: t.stage,
+        survivorSchedule: t.survivorSchedule,
+        survivorCount,
+        nextCutTo:
+          t.stage === "field" ? (t.survivorSchedule.find((s) => s < survivorCount) ?? null) : null,
+        eliminatedAtIndex: t.eliminatedAtIndex,
+        duelWins: t.duelWins,
+        championId: t.championId,
+        meEliminated: me ? t.eliminatedAtIndex[me.id] !== undefined : false,
+      };
+    }
+
     game = {
       phase: engine.phase,
       settings: engine.settings,
@@ -813,6 +961,7 @@ function buildSnapshot(
       scores: engine.scores,
       roundJustEnded: engine.roundJustEnded,
       winnerIds: engine.winnerIds,
+      tournament,
     };
   }
 
@@ -820,6 +969,7 @@ function buildSnapshot(
     roomId: ctx.room.id,
     code: ctx.room.room_code,
     status: ctx.room.status as RoomSnapshot["status"],
+    gameMode: ctx.room.game_mode,
     hostPlayerId: ctx.room.host_player_id,
     maxPlayers: ctx.room.max_players,
     settings: { ...DEFAULT_SETTINGS, ...ctx.room.settings },

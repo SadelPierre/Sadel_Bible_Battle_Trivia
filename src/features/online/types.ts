@@ -1,15 +1,35 @@
 import type {
   BibleQuestion,
   BotDifficulty,
+  GameMode,
   GamePhase,
   GameSettings,
   PlayerAvatar,
   PlayerColor,
   PlayerScoreState,
   PublicQuestion,
+  TournamentStage,
 } from "@/types/game";
 
 export type RoomStatus = "lobby" | "playing" | "complete" | "abandoned";
+
+/** Tournament progress as sent to clients — drives the shrinking-field + duel UI. */
+export type TournamentSnapshot = {
+  stage: TournamentStage;
+  /** the full survivor curve (targets after each field cut), for progress display */
+  survivorSchedule: number[];
+  /** how many players are still in the running right now */
+  survivorCount: number;
+  /** target survivors after the current field question resolves; null during the duel */
+  nextCutTo: number | null;
+  /** playerId → question index at which they were eliminated */
+  eliminatedAtIndex: Record<string, number>;
+  /** duel sudden-death: outright question wins per finalist */
+  duelWins: Record<string, number>;
+  championId: string | null;
+  /** is the requesting player eliminated (i.e. now a spectator)? */
+  meEliminated: boolean;
+};
 
 export type SnapshotPlayer = {
   id: string;
@@ -44,12 +64,15 @@ export type GameSnapshot = {
   scores: Record<string, PlayerScoreState>;
   roundJustEnded: number | null;
   winnerIds: string[] | null;
+  /** present only in tournament games */
+  tournament: TournamentSnapshot | null;
 };
 
 export type RoomSnapshot = {
   roomId: string;
   code: string;
   status: RoomStatus;
+  gameMode: GameMode;
   hostPlayerId: string | null;
   maxPlayers: number;
   settings: GameSettings;
