@@ -53,6 +53,16 @@ Players take turns per question. The screen shows **whose turn it is**; the next
 - **Disconnects:** refresh or reopen the invite link to reclaim your seat; the game continues without you meanwhile (your unanswered questions score 0). If the **host** is gone ~45 s, host status transfers to the longest-connected human player. Rooms expire after 24 h.
 - **Rematch:** from the final screen the host can start a rematch (recent questions are avoided) or return everyone to the lobby.
 
+### Online Tournament (knockout)
+A large-field survival mode for **up to 30 players**.
+
+- Create a tournament from the Online screen → you're the host of a room that seats up to 30. Share the code/link; the host can also fill empty seats with bots.
+- The host starts once **at least 3** competitors have joined — there's no per-player Ready gate.
+- **Field stage:** everyone answers the same question stream at the same time. After each question the field is ranked by total score (correct answers + speed) and the **lowest scorers are cut**. The survivor target shrinks every round — e.g. a full field of 30 goes 30 → 18 → 11 → 7 → 5 → 3 → 2 — so the pack always converges to two finalists.
+- **Duel final:** the last two play **sudden-death** questions. Each question is won outright — a correct answer beats a wrong one, and if both are correct the **faster** answer wins (if both miss, the point simply carries to the next question). First to **2** question-wins is crowned champion.
+- **Eliminated?** You become a **spectator** — you keep watching the live questions and the shrinking leaderboard, but can no longer answer. The round never waits on eliminated players.
+- The final screen crowns the **champion** and shows the full knockout order (champion, runner-up, then everyone by how far they lasted). The host can launch a new tournament or return to the lobby.
+
 ## Fair play
 
 Online scores, timers, question order, and correct answers all live on the server. The correct answer is never sent to your browser until the reveal, and the server rejects late, duplicate, or out-of-range answers — so no browser tricks can change a result.

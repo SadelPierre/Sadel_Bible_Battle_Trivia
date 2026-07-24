@@ -7,7 +7,9 @@ import { useOnlineRoom } from "@/hooks/useOnlineRoom";
 import { clearCredentials, roomActions } from "@/features/online/client";
 import { normalizeRoomCode } from "@/lib/validation";
 import { OnlineLobby } from "@/components/lobby/OnlineLobby";
+import { TournamentLobby } from "@/components/lobby/TournamentLobby";
 import { OnlineGameView } from "@/components/game/OnlineGameView";
+import { TournamentGameView } from "@/components/game/TournamentGameView";
 import { SoundControls } from "@/components/shared/SoundControls";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
@@ -93,21 +95,22 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
         </span>
         <SoundControls />
       </div>
-      {snapshot.status === "lobby" || !snapshot.game ? (
-        <OnlineLobby
-          snapshot={snapshot}
-          creds={credentials!}
-          onLeft={clearAndGoHome}
-          refresh={refresh}
-        />
-      ) : (
-        <OnlineGameView
-          snapshot={snapshot}
-          creds={credentials!}
-          refresh={refresh}
-          onLeft={leaveDuringGame}
-        />
-      )}
+      {(() => {
+        const inLobby = snapshot.status === "lobby" || !snapshot.game;
+        const isTournament = snapshot.gameMode === "tournament";
+        if (inLobby) {
+          return isTournament ? (
+            <TournamentLobby snapshot={snapshot} creds={credentials!} onLeft={clearAndGoHome} refresh={refresh} />
+          ) : (
+            <OnlineLobby snapshot={snapshot} creds={credentials!} onLeft={clearAndGoHome} refresh={refresh} />
+          );
+        }
+        return isTournament ? (
+          <TournamentGameView snapshot={snapshot} creds={credentials!} refresh={refresh} onLeft={leaveDuringGame} />
+        ) : (
+          <OnlineGameView snapshot={snapshot} creds={credentials!} refresh={refresh} onLeft={leaveDuringGame} />
+        );
+      })()}
     </main>
   );
 }

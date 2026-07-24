@@ -59,6 +59,15 @@ Browser ──POST /api/rooms/[code]/answer──▶ Next.js route (service role
 - **Identity:** guests get a localStorage session id; joining a room issues a per-room `token` (returned once, stored client-side). Every API call proves `playerId + token`. Reconnection = rejoining with the same session id.
 - **Host migration:** if the host's heartbeat is >45 s stale, the longest-connected human inherits the crown; a room with no humans becomes `abandoned`. Rooms expire after 24 h.
 
+## Tournament mode
+
+A 30-player survival knockout built as a **thin layer on top of the same engine**, not a parallel system.
+
+- **Engine** (`src/features/tournament/tournament.ts`): the reducer delegates here whenever `GameState.tournament` is present. After each reveal the surviving pack is ranked by cumulative score and cut to a **survivor schedule** (`buildSurvivorSchedule`: 30→18→11→7→5→3→2), deterministic down to a stable player-id tiebreak so the field always converges to two finalists. The last two play a sudden-death **duel** (`DUEL_WINS_TO_WIN` outright question-wins). Eliminated players are rejected by `SUBMIT_ANSWER` and skipped by `allAnswered`, so the round never waits on them.
+- **The answer inbox** (the one scaling change): the standard online path routes every answer through the room's optimistic-version lock, which is fine for 4 players but melts down when 30 people answer inside the same 2-second window. Tournament answers instead write to `tournament_answers` — one row per `(game, question, player)`, distinct primary keys, **zero contention on `game_rooms.version`** — via `submit_tournament_answer` (idempotent, first answer wins, emits a Realtime nudge). The authoritative settle pass drains the inbox (`drain_tournament_answers`) and folds all pending answers into engine state in a **single batched commit** at reveal. The write path never bumps the version; the fold path bumps it once per batch.
+- **Lobby & start:** tournaments seat up to 30 (`game_rooms.max_players` relaxed to 30, `game_mode = 'tournament'`) and start on a **minimum headcount** rather than an all-Ready gate.
+- **UI:** `TournamentLobby`, `TournamentGameView` (field + duel + spectator), `TournamentStandings`, `DuelPanel`, and `ChampionResult` — the room page branches on `snapshot.gameMode`. Everything else (reconnection, host migration, bots, sanitization, realtime nudges) is inherited unchanged.
+
 ## Theming
 
 `<html data-theme="royal-bible">` selects a block of CSS custom properties in `globals.css`, which Tailwind v4 maps to utility colors via `@theme inline`. To add a theme: add tokens to `src/lib/themes.ts`, add a `[data-theme="…"]` block, switch the attribute.

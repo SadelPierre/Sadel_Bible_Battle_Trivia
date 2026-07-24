@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { usePreferences } from "@/stores/preferences";
 import { validateDisplayName, normalizeRoomCode, ROOM_CODE_LENGTH } from "@/lib/validation";
-import { createRoomApi, joinRoomApi, OnlineError } from "@/features/online/client";
+import { createRoomApi, createTournamentApi, joinRoomApi, OnlineError } from "@/features/online/client";
 import { isSupabaseBrowserConfigured } from "@/lib/supabase/browser";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
@@ -20,7 +20,7 @@ function OnlineSetup() {
   const [joinCode, setJoinCode] = useState(normalizeRoomCode(search.get("code") ?? ""));
   const [nameError, setNameError] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<"create" | "join" | null>(null);
+  const [busy, setBusy] = useState<"create" | "tournament" | "join" | null>(null);
 
   const configured = isSupabaseBrowserConfigured();
 
@@ -44,6 +44,20 @@ function OnlineSetup() {
       router.push(`/room/${code}`);
     } catch (e) {
       setApiError(e instanceof OnlineError ? e.message : "Could not create the room.");
+      setBusy(null);
+    }
+  };
+
+  const handleCreateTournament = async () => {
+    const identity = identityOrError();
+    if (!identity) return;
+    setBusy("tournament");
+    setApiError(null);
+    try {
+      const { code } = await createTournamentApi(identity);
+      router.push(`/room/${code}`);
+    } catch (e) {
+      setApiError(e instanceof OnlineError ? e.message : "Could not create the tournament.");
       setBusy(null);
     }
   };
@@ -134,6 +148,21 @@ function OnlineSetup() {
           />
           <Button className="mt-3 w-full" disabled={busy !== null} onClick={handleJoin}>
             {busy === "join" ? "Joining…" : "🚪 Join room"}
+          </Button>
+        </Card>
+        <Card className="border-bbl-gold/40 bg-bbl-gold/5 p-5 text-center sm:col-span-2">
+          <h2 className="text-lg font-bold text-bbl-gold">🏆 Host a tournament</h2>
+          <p className="mt-1 text-xs text-bbl-muted">
+            Up to <strong>30 players</strong> · survival knockout — the lowest scorers are cut each
+            round until the final two duel for the crown
+          </p>
+          <Button
+            variant="gold"
+            className="mt-4 w-full sm:w-auto"
+            disabled={busy !== null}
+            onClick={handleCreateTournament}
+          >
+            {busy === "tournament" ? "Creating…" : "🏆 Create tournament"}
           </Button>
         </Card>
       </div>
