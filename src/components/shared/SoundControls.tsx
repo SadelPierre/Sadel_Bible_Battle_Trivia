@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePreferences } from "@/stores/preferences";
 import { audio } from "@/features/audio/audio";
+import { InstallButton } from "@/components/pwa/InstallButton";
 
 /** Global mute button + expandable music/effects volume sliders + reduced motion. */
 export function SoundControls() {
@@ -88,6 +89,7 @@ export function SoundControls() {
               className="h-4 w-4 accent-[var(--bbl-gold)]"
             />
           </label>
+          <InstallButton />
         </div>
       )}
     </div>
