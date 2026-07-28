@@ -15,13 +15,13 @@
 
 -- ── relax room limits for tournament fields ─────────────────────────────────
 alter table public.game_rooms
-  drop constraint game_rooms_max_players_check;
+  drop constraint if exists game_rooms_max_players_check;
 alter table public.game_rooms
   add constraint game_rooms_max_players_check
   check (max_players between 2 and 30);
 
 alter table public.game_rooms
-  drop constraint game_rooms_game_mode_check;
+  drop constraint if exists game_rooms_game_mode_check;
 alter table public.game_rooms
   add constraint game_rooms_game_mode_check
   check (game_mode in ('online', 'tournament'));

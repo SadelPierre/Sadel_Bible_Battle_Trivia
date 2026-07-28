@@ -30,7 +30,7 @@ import {
 import { buildSurvivorSchedule } from "@/features/tournament/tournament";
 import { planBotAnswer, botName } from "@/features/computer-players/bots";
 import { selectQuestions } from "@/features/questions/select";
-import { QUESTION_BANK } from "@/features/questions/bank";
+import { ONLINE_QUESTION_BANK } from "@/features/questions/bank";
 import { generateRoomCode, sanitizeName } from "@/lib/validation";
 import {
   DEFAULT_SETTINGS,
@@ -182,10 +182,13 @@ async function loadCtx(db: SupabaseClient, code: string): Promise<Ctx> {
     gameDoc &&
     gameDoc.engine.phase === "question"
   ) {
-    const { data: rows } = await db.rpc("drain_tournament_answers", {
+    const { data: rows, error: inboxErr } = await db.rpc("drain_tournament_answers", {
       p_game_id: room.current_game_id,
       p_question_index: gameDoc.engine.currentIndex,
     });
+    // A failed read must never be mistaken for "nobody answered" — that would
+    // advance the question and score every submitted answer as a miss.
+    if (inboxErr) throw new RoomError(inboxErr.message, 500, "db_error");
     if (rows) inboxAnswers = rows as InboxRow[];
   }
 
@@ -298,10 +301,58 @@ export function shouldRevealOnline(state: GameState, now: number): boolean {
   return state.questionDeadline !== null && now >= state.questionDeadline + LATE_GRACE_MS;
 }
 
-/** Run all due time-based transitions. Loops until stable. */
-function settleGame(ctx: Ctx, now: number): void {
+/**
+ * Fold inbox answers into authoritative pending answers.
+ *
+ * Idempotent: a player who already has a pending answer is skipped, so racing
+ * settle passes converge on the same set. Returns null when nothing changed.
+ */
+function foldInboxAnswers(engine: GameState, rows: InboxRow[]): GameState | null {
+  if (rows.length === 0) return null;
+  const pending = { ...engine.pendingAnswers };
+  let folded = false;
+  for (const row of rows) {
+    if (pending[row.player_id] !== undefined) continue;
+    if (!engine.players.some((p) => p.id === row.player_id)) continue;
+    if (engine.tournament?.eliminatedAtIndex[row.player_id] !== undefined) continue;
+    pending[row.player_id] = {
+      answerIndex: row.answer_index,
+      responseMs: row.response_ms,
+      submittedAt: new Date(row.submitted_at).getTime(),
+    };
+    folded = true;
+  }
+  return folded ? { ...engine, pendingAnswers: pending } : null;
+}
+
+/**
+ * Close a tournament question and return its final answer set.
+ *
+ * The database takes an exclusive lock on the game row, waits for every
+ * in-flight submission to commit, and refuses any that starts afterwards. The
+ * old code read the inbox and revealed in two separate steps, so an answer
+ * landing in between was accepted by the API and then silently dropped.
+ */
+async function closeTournamentQuestion(ctx: Ctx, questionIndex: number): Promise<InboxRow[]> {
+  const { data, error } = await ctx.db.rpc("close_tournament_question", {
+    p_game_id: ctx.room.current_game_id,
+    p_question_index: questionIndex,
+  });
+  if (error) throw new RoomError(error.message, 500, "db_error");
+  return (data ?? []) as InboxRow[];
+}
+
+/**
+ * Run all due time-based transitions. Loops until stable.
+ *
+ * `canClose` is false for callers that only want an accurate in-memory clock
+ * and will not persist the result: closing a question is a durable decision,
+ * so it belongs to the paths that commit.
+ */
+async function settleGame(ctx: Ctx, now: number, canClose = true): Promise<void> {
   const doc = ctx.gameDoc;
   if (!doc) return;
+  const isTournament = ctx.room.game_mode === "tournament" && Boolean(ctx.room.current_game_id);
   let engine = doc.engine;
   let changed = true;
   let guard = 0;
@@ -319,28 +370,12 @@ function settleGame(ctx: Ctx, now: number): void {
 
     if (engine.phase === "question") {
       // Fold any inbox answers (tournament humans) into authoritative state.
-      // Idempotent: already-folded players are skipped, so racing settle passes
-      // converge on the same pendingAnswers set.
-      if (ctx.inboxAnswers.length > 0) {
-        const pending = { ...engine.pendingAnswers };
-        let folded = false;
-        for (const row of ctx.inboxAnswers) {
-          if (pending[row.player_id] !== undefined) continue;
-          if (!engine.players.some((p) => p.id === row.player_id)) continue;
-          if (engine.tournament?.eliminatedAtIndex[row.player_id] !== undefined) continue;
-          pending[row.player_id] = {
-            answerIndex: row.answer_index,
-            responseMs: row.response_ms,
-            submittedAt: new Date(row.submitted_at).getTime(),
-          };
-          folded = true;
-        }
-        if (folded) {
-          engine = { ...engine, pendingAnswers: pending };
-          doc.engine = engine;
-          ctx.gameDirty = true;
-          changed = true;
-        }
+      const folded = foldInboxAnswers(engine, ctx.inboxAnswers);
+      if (folded) {
+        engine = folded;
+        doc.engine = engine;
+        ctx.gameDirty = true;
+        changed = true;
       }
       planBots(ctx, now);
       // apply bot answers that are due
@@ -364,6 +399,19 @@ function settleGame(ctx: Ctx, now: number): void {
         }
       }
       if (shouldRevealOnline(engine, now)) {
+        if (isTournament) {
+          // Leave the reveal to a caller that will persist it, so the durable
+          // "question closed" marker and the engine state agree.
+          if (!canClose) break;
+          const finalRows = await closeTournamentQuestion(ctx, engine.currentIndex);
+          ctx.inboxAnswers = finalRows;
+          const lastCall = foldInboxAnswers(engine, finalRows);
+          if (lastCall) {
+            engine = lastCall;
+            doc.engine = engine;
+            ctx.gameDirty = true;
+          }
+        }
         engine = gameReducer(engine, { type: "LOCK_AND_REVEAL", now });
         doc.engine = engine;
         ctx.gameDirty = true;
@@ -422,7 +470,7 @@ async function withRoom<T>(
     const ctx = await loadCtx(db, code);
     const now = Date.now();
     settleHost(ctx, now);
-    settleGame(ctx, now);
+    await settleGame(ctx, now);
     const result = await fn(ctx, now);
     // pure reads (no dirty flags) never bump the version or notify — otherwise
     // every poll would trigger a refetch storm
@@ -478,10 +526,21 @@ function playerInsertError(error: { code?: string; message: string }): RoomError
 
 export type Identity = { name: string; avatar: string; color: string; sessionId: string };
 
+type CreatedRoom = { room_code: string; player_id: string; player_token: string };
+
+/**
+ * Create a room and seat its host.
+ *
+ * One database transaction: previously this was three independent writes, so a
+ * failure could leave a room with no players or no host, and a lost response
+ * left the user pressing the button again and getting a second room. The
+ * caller's `operationId` makes a retry return the room the first attempt made.
+ */
 export async function createRoom(
   identity: Identity,
   maxPlayers: number,
   mode: GameMode = "online",
+  operationId: string = randomUUID(),
 ) {
   const db = supabaseAdmin();
   const floor = mode === "tournament" ? MIN_TOURNAMENT_PLAYERS : 2;
@@ -489,44 +548,42 @@ export async function createRoom(
   const clampedMax = Math.min(cap, Math.max(floor, maxPlayers));
   // retry on the (unlikely) code collision
   for (let attempt = 0; attempt < 5; attempt++) {
-    const code = generateRoomCode();
-    const { data: room, error } = await db
-      .from("game_rooms")
-      .insert({
-        room_code: code,
-        status: "lobby",
-        game_mode: mode,
-        max_players: clampedMax,
-        settings: DEFAULT_SETTINGS,
-      })
-      .select("*")
-      .single();
+    const { data, error } = await db.rpc("create_room_with_host", {
+      p_room_code: generateRoomCode(),
+      p_game_mode: mode,
+      p_max_players: clampedMax,
+      p_settings: DEFAULT_SETTINGS,
+      p_operation_id: operationId,
+      p_session_id: identity.sessionId,
+      p_display_name: sanitizeName(identity.name) || "Host",
+      p_avatar: identity.avatar,
+      p_player_color: identity.color,
+    });
     if (error) {
-      if (error.code === "23505") continue; // duplicate code
-      throw new RoomError(error.message, 500, "db_error");
+      // Either the room code collided, or a concurrent request with the same
+      // operation id won. Both are resolved by trying again: the next attempt
+      // finds the existing seat and returns it.
+      if (error.code === "23505") continue;
+      throw playerInsertError(error);
     }
-    const { data: player, error: pErr } = await db
-      .from("room_players")
-      .insert({
-        room_id: room.id,
-        session_id: identity.sessionId,
-        display_name: sanitizeName(identity.name) || "Host",
-        avatar: identity.avatar,
-        player_color: identity.color,
-        is_host: true,
-        is_ready: true,
-      })
-      .select("*")
-      .single();
-    if (pErr) throw playerInsertError(pErr);
-    const { error: hostError } = await db
-      .from("game_rooms")
-      .update({ host_player_id: player.id })
-      .eq("id", room.id);
-    if (hostError) throw new RoomError(hostError.message, 500, "db_error");
-    return { code, playerId: player.id as string, token: player.token as string };
+    const room = (Array.isArray(data) ? data[0] : data) as CreatedRoom | undefined;
+    if (!room) continue;
+    void sweepExpiredRooms(db);
+    return { code: room.room_code, playerId: room.player_id, token: room.player_token };
   }
   throw new RoomError("Could not create a room. Please try again.", 500, "room_create_failed");
+}
+
+/**
+ * Opportunistic retention sweep, sampled so it costs roughly one extra query
+ * per ten rooms. pg_cron does this on a schedule where it is available; this
+ * keeps a project without it from accumulating expired rooms forever.
+ */
+function sweepExpiredRooms(db: SupabaseClient): void {
+  if (Math.random() > 0.1) return;
+  void db.rpc("cleanup_expired_rooms").then(({ error }) => {
+    if (error) console.error("cleanup_expired_rooms failed:", error.message);
+  });
 }
 
 export async function joinRoom(code: string, identity: Identity) {
@@ -725,7 +782,7 @@ function beginGame(ctx: Ctx, now: number, excludeIds: string[]): void {
     const needed = buildSurvivorSchedule(players.length).length + DUEL_WINS_TO_WIN * 2 + 2;
     settings = { ...settings, questionCount: Math.max(settings.questionCount, needed), roundSize: 0 };
   }
-  const questions = selectQuestions(QUESTION_BANK, settings, new Set(excludeIds));
+  const questions = selectQuestions(ONLINE_QUESTION_BANK, settings, new Set(excludeIds));
   const engine = isTournament
     ? createTournamentGame(settings, players, questions, now)
     : createGame(settings, players, questions, now);
@@ -794,7 +851,7 @@ export async function submitAnswer(
     if (!doc) throw new RoomError("No game in progress.", 409, "no_game");
     // Advance authoritative time in memory (not persisted) so timing is accurate
     // even if no poll has settled the countdown→question transition yet.
-    settleGame(ctx, now);
+    await settleGame(ctx, now, false);
     const engine = doc.engine;
     if (engine.phase !== "question") return; // not accepting answers right now
     if (engine.tournament?.eliminatedAtIndex[me.id] !== undefined) {
@@ -819,7 +876,7 @@ export async function submitAnswer(
 
   // Normal online (≤4 players): version-checked mutation with a settle pass, so
   // reveal happens instantly once everyone has answered.
-  return withRoom(code, (c, now) => {
+  return withRoom(code, async (c, now) => {
     const me = requirePlayer(c, playerId, token);
     if (!c.gameDoc) throw new RoomError("No game in progress.", 409, "no_game");
     const before = c.gameDoc.engine;
@@ -832,7 +889,7 @@ export async function submitAnswer(
     if (after !== before) {
       c.gameDoc.engine = after;
       c.gameDirty = true;
-      settleGame(c, now);
+      await settleGame(c, now);
     }
   });
 }

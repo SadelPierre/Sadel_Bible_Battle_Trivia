@@ -1,4 +1,7 @@
-import { makeQuestionFactory } from "./helpers";
+// OFFLINE pool — shipped to the browser for Solo and Local play.
+// These questions carry their answer key into the client bundle and must
+// therefore never appear in a competitive online match. See ../online/.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("general");
 
@@ -15,17 +18,6 @@ export const generalQuestions = [
     ["commandments", "law"],
   ),
   q(
-    "ge-002",
-    "old",
-    "easy",
-    "On which day of creation week did God rest?",
-    ["The seventh", "The sixth", "The first", "The third"],
-    0,
-    "Genesis 2:2-3",
-    "God ended His work and rested the seventh day, blessing and sanctifying it.",
-    ["creation", "rest", "sabbath"],
-  ),
-  q(
     "ge-003",
     "old",
     "easy",
@@ -35,17 +27,6 @@ export const generalQuestions = [
     "Genesis 9:13-15",
     "God said, \"I do set my bow in the cloud, and it shall be for a token of a covenant between me and the earth.\"",
     ["rainbow", "covenant", "noah"],
-  ),
-  q(
-    "ge-004",
-    "new",
-    "easy",
-    "What prayer did Jesus teach His disciples that begins, \"Our Father which art in heaven\"?",
-    ["The Lord's Prayer", "The Shepherd's Prayer", "The Temple Prayer", "The Prayer of Jabez"],
-    0,
-    "Matthew 6:9-13",
-    "In the Sermon on the Mount, Jesus gave this model prayer, teaching us to honor God, seek His will, and depend on Him daily.",
-    ["lords prayer", "sermon on the mount"],
   ),
   q(
     "ge-005",
@@ -64,17 +45,6 @@ export const generalQuestions = [
     ["greatest commandment", "love"],
   ),
   q(
-    "ge-006",
-    "new",
-    "medium",
-    "Which quality is listed FIRST among the fruit of the Spirit?",
-    ["Love", "Joy", "Peace", "Faith"],
-    0,
-    "Galatians 5:22-23",
-    "\"The fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith, meekness, temperance.\"",
-    ["fruit of the spirit"],
-  ),
-  q(
     "ge-007",
     "new",
     "medium",
@@ -84,22 +54,6 @@ export const generalQuestions = [
     "Ephesians 6:17",
     "Paul identifies the sword of the Spirit as the word of God — the armor's one offensive weapon, which Jesus Himself used against temptation.",
     ["armor of god", "sword"],
-  ),
-  q(
-    "ge-008",
-    "new",
-    "medium",
-    "What two foods did Jesus share with His disciples at the Last Supper as symbols of His body and blood?",
-    [
-      "Bread and the fruit of the vine",
-      "Fish and honey",
-      "Lamb and olives",
-      "Manna and water",
-    ],
-    0,
-    "Matthew 26:26-28",
-    "Jesus took bread and the cup, giving thanks, as emblems of His body broken and His blood shed for the remission of sins.",
-    ["last supper", "communion"],
   ),
   q(
     "ge-009",
@@ -118,22 +72,6 @@ export const generalQuestions = [
     ["golden rule"],
   ),
   q(
-    "ge-010",
-    "new",
-    "hard",
-    "According to Romans 6:23, what is \"the gift of God\"?",
-    [
-      "Eternal life through Jesus Christ our Lord",
-      "Daily bread",
-      "The promised land",
-      "Wisdom and knowledge",
-    ],
-    0,
-    "Romans 6:23",
-    "\"For the wages of sin is death; but the gift of God is eternal life through Jesus Christ our Lord.\"",
-    ["romans", "salvation", "gift"],
-  ),
-  q(
     "ge-011",
     "old",
     "easy",
@@ -143,17 +81,6 @@ export const generalQuestions = [
     "Genesis 7:12",
     "The rain fell upon the earth forty days and forty nights, and the waters covered even the highest mountains.",
     ["flood", "rain"],
-  ),
-  q(
-    "ge-012",
-    "old",
-    "easy",
-    "How many people were kept safe in Noah's ark through the flood?",
-    ["Eight", "Four", "Twelve", "Two"],
-    0,
-    "1 Peter 3:20",
-    "Eight souls — Noah, his wife, his three sons, and their wives — were saved by water in the ark.",
-    ["noah", "salvation"],
   ),
   q(
     "ge-013",
@@ -167,17 +94,6 @@ export const generalQuestions = [
     ["beatitudes", "sermon on the mount"],
   ),
   q(
-    "ge-014",
-    "old",
-    "medium",
-    "What are the first three words of the Bible?",
-    ["In the beginning", "God created light", "Let there be", "The Lord God"],
-    0,
-    "Genesis 1:1",
-    "The Bible opens with \"In the beginning God created the heaven and the earth,\" declaring God as Creator of all.",
-    ["genesis", "creation"],
-  ),
-  q(
     "ge-015",
     "new",
     "medium",
@@ -187,22 +103,6 @@ export const generalQuestions = [
     "1 Corinthians 13:13",
     "Paul concludes that faith, hope, and charity abide, but the greatest of these is charity, that is, love.",
     ["love", "charity"],
-  ),
-  q(
-    "ge-016",
-    "new",
-    "easy",
-    "What did Jesus give as the second great commandment, after loving God?",
-    [
-      "Love your neighbour as yourself",
-      "Honour your father and mother",
-      "You shall not steal",
-      "Remember the Sabbath day",
-    ],
-    0,
-    "Matthew 22:39",
-    "Jesus said the second commandment is like the first: to love your neighbour as yourself; on these hang all the law and prophets.",
-    ["commandments", "love"],
   ),
   q(
     "ge-017",
@@ -216,17 +116,6 @@ export const generalQuestions = [
     ["pentateuch", "moses", "law"],
   ),
   q(
-    "ge-018",
-    "new",
-    "medium",
-    "What does the word 'gospel' mean?",
-    ["Good news", "Holy law", "God's throne", "New song"],
-    0,
-    "Mark 1:1",
-    "The word gospel means good news — the good news of salvation through Jesus Christ, the Son of God.",
-    ["gospel", "good news"],
-  ),
-  q(
     "ge-019",
     "new",
     "hard",
@@ -236,21 +125,5 @@ export const generalQuestions = [
     "Galatians 5:22",
     "The fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith, meekness, and temperance.",
     ["fruit of the spirit", "patience"],
-  ),
-  q(
-    "ge-020",
-    "new",
-    "easy",
-    "What central event of the Christian faith is remembered at Easter?",
-    [
-      "The resurrection of Jesus",
-      "The birth of Jesus",
-      "The giving of the Law",
-      "The coming of the Spirit",
-    ],
-    0,
-    "Matthew 28:6",
-    "Easter celebrates the resurrection: the angel announced, \"He is not here: for he is risen, as he said.\"",
-    ["resurrection", "easter"],
   ),
 ];

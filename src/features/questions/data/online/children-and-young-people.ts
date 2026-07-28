@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("children-and-young-people");
 
 export const childrenAndYoungPeopleQuestions = [
-  q(
-    "cy-001",
-    "old",
-    "easy",
-    "What weapon did young David use against the giant Goliath?",
-    ["A sling and a stone", "A sword", "A spear", "A bow and arrow"],
-    0,
-    "1 Samuel 17:49-50",
-    "David ran toward Goliath with his sling and a smooth stone, trusting in the name of the LORD of hosts.",
-    ["david", "goliath", "sling"],
-  ),
   q(
     "cy-002",
     "old",
@@ -24,17 +15,6 @@ export const childrenAndYoungPeopleQuestions = [
     "Exodus 2:3-5",
     "Moses' mother hid him in an ark of bulrushes by the river's edge, where Pharaoh's daughter found him and raised him as her son.",
     ["moses", "basket", "nile"],
-  ),
-  q(
-    "cy-003",
-    "old",
-    "easy",
-    "Which boy heard God calling his name at night and answered, \"Speak; for thy servant heareth\"?",
-    ["Samuel", "David", "Eli", "Solomon"],
-    0,
-    "1 Samuel 3:4-10",
-    "Young Samuel, serving in the tabernacle with Eli, heard the LORD call him three times before he understood who was speaking.",
-    ["samuel", "calling"],
   ),
   q(
     "cy-004",
@@ -53,17 +33,6 @@ export const childrenAndYoungPeopleQuestions = [
     ["children", "blessing"],
   ),
   q(
-    "cy-005",
-    "new",
-    "medium",
-    "Who provided the five barley loaves and two small fishes that Jesus multiplied?",
-    ["A young boy", "Peter's mother", "A rich ruler", "The disciples bought them"],
-    0,
-    "John 6:8-11",
-    "Andrew found a lad with five barley loaves and two small fishes, and Jesus used the boy's small lunch to feed thousands.",
-    ["boy", "loaves", "feeding"],
-  ),
-  q(
     "cy-006",
     "old",
     "medium",
@@ -73,17 +42,6 @@ export const childrenAndYoungPeopleQuestions = [
     "Genesis 35:16-18",
     "Benjamin, born to Rachel near Bethlehem, was Jacob's youngest son and Joseph's only full brother.",
     ["benjamin", "jacob"],
-  ),
-  q(
-    "cy-007",
-    "old",
-    "medium",
-    "Which king of Judah began to reign when he was only seven years old?",
-    ["Joash", "Josiah", "Solomon", "Rehoboam"],
-    0,
-    "2 Kings 11:21-12:2",
-    "Joash was hidden from wicked Athaliah as a baby, crowned at seven, and did right while Jehoiada the priest instructed him.",
-    ["joash", "young king"],
   ),
   q(
     "cy-008",
@@ -102,22 +60,6 @@ export const childrenAndYoungPeopleQuestions = [
     ["timothy", "eunice", "lois"],
   ),
   q(
-    "cy-009",
-    "old",
-    "hard",
-    "Who told Naaman's wife that a prophet in Samaria could heal Naaman's leprosy?",
-    [
-      "A young Israelite servant girl",
-      "The king of Syria",
-      "Elisha's servant Gehazi",
-      "Naaman's own son",
-    ],
-    0,
-    "2 Kings 5:2-3",
-    "A little maid carried captive from Israel bravely spoke up, and through her words Naaman found healing — and Israel's God.",
-    ["naaman", "servant girl", "elisha"],
-  ),
-  q(
     "cy-010",
     "old",
     "hard",
@@ -127,17 +69,6 @@ export const childrenAndYoungPeopleQuestions = [
     "Genesis 37:2, 28",
     "Joseph was seventeen when he dreamed his dreams and was sold by his jealous brothers to traders bound for Egypt.",
     ["joseph", "brothers", "egypt"],
-  ),
-  q(
-    "cy-011",
-    "old",
-    "easy",
-    "What special gift from his father made Joseph's brothers jealous of him?",
-    ["A coat of many colours", "A golden ring", "A royal crown", "A silver cup"],
-    0,
-    "Genesis 37:3-4",
-    "Israel loved Joseph more than his other sons and made him a coat of many colours, which stirred up his brothers' envy.",
-    ["joseph", "coat"],
   ),
   q(
     "cy-012",
@@ -151,17 +82,6 @@ export const childrenAndYoungPeopleQuestions = [
     ["david", "shepherd"],
   ),
   q(
-    "cy-013",
-    "old",
-    "medium",
-    "Shadrach, Meshach, and who else were the three young Hebrews thrown into the fiery furnace?",
-    ["Abednego", "Azariah", "Belteshazzar", "Eliezer"],
-    0,
-    "Daniel 3:20-27",
-    "Shadrach, Meshach, and Abednego refused to bow to the golden image, and God kept them unharmed in the furnace.",
-    ["furnace", "faithfulness"],
-  ),
-  q(
     "cy-014",
     "old",
     "easy",
@@ -171,17 +91,6 @@ export const childrenAndYoungPeopleQuestions = [
     "Genesis 7:8-9",
     "The animals went into the ark two by two, male and female, just as God had commanded Noah, and God kept them safe.",
     ["noah", "animals"],
-  ),
-  q(
-    "cy-015",
-    "new",
-    "medium",
-    "Which young man watched the coats while Stephen was stoned, later becoming a great apostle?",
-    ["Saul", "Barnabas", "Silas", "Timothy"],
-    0,
-    "Acts 7:58",
-    "The witnesses laid their clothes at the feet of a young man named Saul, who later became the apostle Paul.",
-    ["saul", "stephen", "apostle"],
   ),
   q(
     "cy-016",
@@ -195,17 +104,6 @@ export const childrenAndYoungPeopleQuestions = [
     ["jonah", "fish"],
   ),
   q(
-    "cy-017",
-    "new",
-    "medium",
-    "In Jesus' teaching, where should you put a lighted candle so it gives light to everyone?",
-    ["On a candlestick", "Under a bushel", "Beneath the bed", "Inside a jar"],
-    0,
-    "Matthew 5:15-16",
-    "Jesus said no one lights a candle to hide it, but sets it on a candlestick so all may see, teaching us to let our light shine.",
-    ["light", "candle", "witness"],
-  ),
-  q(
     "cy-018",
     "old",
     "hard",
@@ -215,17 +113,6 @@ export const childrenAndYoungPeopleQuestions = [
     "Esther 4:14",
     "Mordecai urged Esther to plead for her people, suggesting she had become queen for such a time as this.",
     ["esther", "courage"],
-  ),
-  q(
-    "cy-019",
-    "old",
-    "hard",
-    "Which prophet raised the Shunammite woman's young son back to life?",
-    ["Elisha", "Elijah", "Isaiah", "Samuel"],
-    0,
-    "2 Kings 4:32-35",
-    "When the Shunammite woman's son died, Elisha prayed and stretched himself upon the child, and the boy was restored to life.",
-    ["elisha", "shunammite", "resurrection"],
   ),
   q(
     "cy-020",

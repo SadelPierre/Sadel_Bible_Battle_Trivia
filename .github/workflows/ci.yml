@@ -43,6 +43,75 @@ jobs:
       - name: Build
         run: npm run build
 
+  migrations:
+    # Replays the whole chain against an empty database. A migration that only
+    # applies to one particular existing database is not a migration, and that
+    # is exactly the failure this job exists to catch.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGDATABASE: postgres
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install psql
+        run: sudo apt-get update && sudo apt-get install --no-install-recommends -y postgresql-client
+
+      - name: Create the roles and schemas Supabase normally provides
+        run: psql -v ON_ERROR_STOP=1 -f supabase/ci/bootstrap.sql
+
+      - name: Apply every migration in order
+        run: |
+          for file in $(ls supabase/migrations/*.sql | sort); do
+            echo "── $file"
+            psql -v ON_ERROR_STOP=1 -f "$file"
+          done
+
+      - name: Replay them a second time to prove they are idempotent
+        run: |
+          for file in supabase/migrations/20260718032644_advisor_hardening.sql \
+                      supabase/migrations/20260718033054_player_membership_versioning.sql \
+                      supabase/migrations/20260728120000_review_hardening.sql; do
+            echo "── replay $file"
+            psql -v ON_ERROR_STOP=1 -f "$file"
+          done
+
+      - name: Check the functions the server calls exist and run
+        run: |
+          psql -v ON_ERROR_STOP=1 -c "
+            do \$\$
+            declare missing text;
+            begin
+              select string_agg(n.name, ', ') into missing
+              from unnest(array[
+                'commit_room_state', 'submit_tournament_answer',
+                'drain_tournament_answers', 'close_tournament_question',
+                'create_room_with_host', 'rate_limit_hit', 'cleanup_expired_rooms'
+              ]) as n(name)
+              where to_regproc('public.' || n.name) is null;
+              if missing is not null then
+                raise exception 'missing functions: %', missing;
+              end if;
+            end \$\$;
+          "
+          psql -v ON_ERROR_STOP=1 -c "select public.cleanup_expired_rooms();"
+          psql -v ON_ERROR_STOP=1 -c "select public.rate_limit_hit('ci', 1, 60);"
+
   browser:
     needs: validate
     runs-on: ubuntu-latest

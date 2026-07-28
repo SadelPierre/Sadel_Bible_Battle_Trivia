@@ -1,4 +1,7 @@
-import { makeQuestionFactory } from "./helpers";
+// OFFLINE pool — shipped to the browser for Solo and Local play.
+// These questions carry their answer key into the client bundle and must
+// therefore never appear in a competitive online match. See ../online/.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("life-of-jesus");
 
@@ -20,17 +23,6 @@ export const lifeOfJesusQuestions = [
     ["cana", "wedding", "miracle"],
   ),
   q(
-    "lj-002",
-    "new",
-    "easy",
-    "Who was the mother of Jesus?",
-    ["Mary", "Martha", "Elizabeth", "Salome"],
-    0,
-    "Luke 1:30-31",
-    "The angel Gabriel told Mary she would conceive and bring forth a son and call His name JESUS.",
-    ["mary", "birth"],
-  ),
-  q(
     "lj-003",
     "new",
     "easy",
@@ -40,17 +32,6 @@ export const lifeOfJesusQuestions = [
     "Mark 6:3",
     "The people of Nazareth asked, \"Is not this the carpenter, the son of Mary?\" — showing Jesus worked as a carpenter before His ministry.",
     ["carpenter", "nazareth"],
-  ),
-  q(
-    "lj-004",
-    "new",
-    "easy",
-    "Which disciple betrayed Jesus for thirty pieces of silver?",
-    ["Judas Iscariot", "Peter", "Thomas", "Andrew"],
-    0,
-    "Matthew 26:14-16",
-    "Judas Iscariot went to the chief priests and agreed to betray Jesus for thirty pieces of silver.",
-    ["judas", "betrayal"],
   ),
   q(
     "lj-005",
@@ -64,17 +45,6 @@ export const lifeOfJesusQuestions = [
     ["temptation", "wilderness", "fasting"],
   ),
   q(
-    "lj-006",
-    "new",
-    "medium",
-    "Who was compelled to carry Jesus' cross on the way to Calvary?",
-    ["Simon of Cyrene", "Joseph of Arimathaea", "Nicodemus", "Simon Peter"],
-    0,
-    "Luke 23:26",
-    "The soldiers laid the cross on Simon, a man from Cyrene who was coming in from the country, to carry it behind Jesus.",
-    ["cross", "simon of cyrene"],
-  ),
-  q(
     "lj-007",
     "new",
     "medium",
@@ -84,17 +54,6 @@ export const lifeOfJesusQuestions = [
     "Matthew 21:6-9",
     "Jesus rode into Jerusalem on a donkey's colt while crowds spread branches and cried \"Hosanna,\" fulfilling Zechariah 9:9.",
     ["palm sunday", "triumphal entry"],
-  ),
-  q(
-    "lj-008",
-    "new",
-    "medium",
-    "In which garden did Jesus pray on the night He was arrested?",
-    ["Gethsemane", "Eden", "The king's garden", "Bethany"],
-    0,
-    "Matthew 26:36-39",
-    "Jesus went with His disciples to a place called Gethsemane and prayed, \"Not as I will, but as thou wilt.\"",
-    ["gethsemane", "prayer"],
   ),
   q(
     "lj-009",
@@ -108,17 +67,6 @@ export const lifeOfJesusQuestions = [
     ["boyhood", "temple"],
   ),
   q(
-    "lj-010",
-    "new",
-    "hard",
-    "For how many days did Jesus appear to His disciples between His resurrection and ascension?",
-    ["Forty", "Three", "Seven", "Fifty"],
-    0,
-    "Acts 1:3",
-    "Jesus showed Himself alive after His suffering \"by many infallible proofs, being seen of them forty days\" before ascending to heaven.",
-    ["resurrection", "ascension"],
-  ),
-  q(
     "lj-011",
     "new",
     "easy",
@@ -130,18 +78,6 @@ export const lifeOfJesusQuestions = [
     ["wise men", "gifts", "nativity"],
   ),
   q(
-    "lj-012",
-    "new",
-    "easy",
-    "John the Baptist called Jesus the Lamb of God who takes away what?",
-    ["The sin of the world", "The sea and sky", "The curse of the law", "The fear of death"],
-    0,
-    "John 1:29",
-    "Seeing Jesus coming, John declared Him the Lamb of God, pointing to His sacrifice for sin.",
-    ["john the baptist", "lamb of god"],
-    "Behold the Lamb of God, which taketh away the sin of the world.",
-  ),
-  q(
     "lj-013",
     "new",
     "medium",
@@ -151,17 +87,6 @@ export const lifeOfJesusQuestions = [
     "John 13:4-5",
     "Jesus laid aside His garments, took a towel, and washed the disciples' feet, giving them an example of humble service.",
     ["last supper", "humility", "servanthood"],
-  ),
-  q(
-    "lj-014",
-    "new",
-    "medium",
-    "Which Roman governor sentenced Jesus to be crucified after washing his hands?",
-    ["Pontius Pilate", "Herod Antipas", "Caiaphas", "Felix"],
-    0,
-    "Matthew 27:24-26",
-    "Pilate found no fault in Jesus, yet yielded to the crowd. He washed his hands before them and delivered Jesus to be crucified.",
-    ["pilate", "trial", "crucifixion"],
   ),
   q(
     "lj-015",
@@ -180,17 +105,6 @@ export const lifeOfJesusQuestions = [
     ["cross", "inscription"],
   ),
   q(
-    "lj-016",
-    "new",
-    "easy",
-    "On which day of the week did Jesus rise from the dead?",
-    ["The first day of the week", "The Sabbath", "The day of Passover", "The seventh day"],
-    0,
-    "Mark 16:9",
-    "Jesus rose early on the first day of the week, which is why believers gather to worship on Sunday, the Lord's day.",
-    ["resurrection", "first day"],
-  ),
-  q(
     "lj-017",
     "new",
     "medium",
@@ -207,22 +121,6 @@ export const lifeOfJesusQuestions = [
     ["transfiguration", "moses", "elijah"],
   ),
   q(
-    "lj-018",
-    "new",
-    "hard",
-    "What did Jesus first pray from the cross concerning those who crucified Him?",
-    [
-      "Father, forgive them; for they know not what they do",
-      "My God, why hast thou forsaken me",
-      "It is finished",
-      "Into thy hands I commend my spirit",
-    ],
-    0,
-    "Luke 23:34",
-    "Even while being nailed to the cross, Jesus prayed for His executioners, asking the Father to forgive them.",
-    ["cross", "forgiveness"],
-  ),
-  q(
     "lj-019",
     "new",
     "medium",
@@ -232,16 +130,5 @@ export const lifeOfJesusQuestions = [
     "Acts 1:9-11",
     "As the disciples watched, Jesus was taken up and a cloud received Him. Angels promised He would return in like manner.",
     ["ascension", "heaven"],
-  ),
-  q(
-    "lj-020",
-    "new",
-    "hard",
-    "Who was the elderly man promised he would not die before seeing the Lord's Christ, and held the infant Jesus?",
-    ["Simeon", "Zacharias", "Nicodemus", "Joseph of Arimathaea"],
-    0,
-    "Luke 2:25-32",
-    "Simeon, a just and devout man, took the child Jesus in his arms and blessed God, having seen the salvation God prepared.",
-    ["simeon", "temple", "presentation"],
   ),
 ];

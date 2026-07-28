@@ -39,7 +39,10 @@ end;
 $$;
 
 -- Invalidate stale lobby/game snapshots when the roster or ready state changes.
-create function private.bump_room_version_for_player_change()
+--
+-- As with the previous migration, 0001_init.sql now creates these objects, so
+-- everything below is written to replay cleanly on a blank database.
+create or replace function private.bump_room_version_for_player_change()
 returns trigger
 language plpgsql
 security invoker
@@ -72,10 +75,12 @@ begin
 end;
 $$;
 
+drop trigger if exists bump_room_version_after_membership_change on public.room_players;
 create trigger bump_room_version_after_membership_change
   after insert or delete on public.room_players
   for each row execute function private.bump_room_version_for_player_change();
 
+drop trigger if exists bump_room_version_after_ready_change on public.room_players;
 create trigger bump_room_version_after_ready_change
   after update of is_ready on public.room_players
   for each row

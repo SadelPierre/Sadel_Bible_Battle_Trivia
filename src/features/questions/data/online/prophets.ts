@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("prophets");
 
 export const prophetsQuestions = [
-  q(
-    "pr-001",
-    "old",
-    "easy",
-    "Which prophet went up to heaven in a whirlwind with a chariot of fire?",
-    ["Elijah", "Elisha", "Enoch", "Isaiah"],
-    0,
-    "2 Kings 2:11",
-    "As Elijah and Elisha walked together, a chariot and horses of fire parted them, and Elijah went up by a whirlwind into heaven.",
-    ["elijah", "whirlwind"],
-  ),
   q(
     "pr-002",
     "old",
@@ -24,17 +15,6 @@ export const prophetsQuestions = [
     "Jonah 1:1-2; 3:1-5",
     "God sent Jonah to Nineveh. After his detour in the great fish, Jonah preached and the whole city repented in sackcloth.",
     ["jonah", "nineveh", "repentance"],
-  ),
-  q(
-    "pr-003",
-    "old",
-    "medium",
-    "Which prophet saw a valley of dry bones come to life?",
-    ["Ezekiel", "Daniel", "Zechariah", "Habakkuk"],
-    0,
-    "Ezekiel 37:1-10",
-    "In Ezekiel's vision the bones came together, flesh covered them, and breath entered them — a promise that God would revive Israel.",
-    ["ezekiel", "dry bones", "vision"],
   ),
   q(
     "pr-004",
@@ -48,17 +28,6 @@ export const prophetsQuestions = [
     ["samuel", "anointing"],
   ),
   q(
-    "pr-005",
-    "old",
-    "medium",
-    "Which prophet foretold that a virgin would conceive and bear a son called Immanuel?",
-    ["Isaiah", "Jeremiah", "Micah", "Malachi"],
-    0,
-    "Isaiah 7:14",
-    "Isaiah prophesied, \"Behold, a virgin shall conceive, and bear a son, and shall call his name Immanuel\" — fulfilled in Jesus (Matthew 1:22-23).",
-    ["isaiah", "immanuel", "prophecy"],
-  ),
-  q(
     "pr-006",
     "old",
     "medium",
@@ -68,17 +37,6 @@ export const prophetsQuestions = [
     "2 Kings 2:9-15",
     "Elisha asked for a double portion of Elijah's spirit. When Elijah was taken up, Elisha took his mantle and continued his prophetic work.",
     ["elisha", "mantle"],
-  ),
-  q(
-    "pr-007",
-    "old",
-    "medium",
-    "Which prophet is often called the weeping prophet because of his sorrow for Judah?",
-    ["Jeremiah", "Amos", "Zephaniah", "Haggai"],
-    0,
-    "Jeremiah 9:1",
-    "Jeremiah wished his eyes were \"a fountain of tears\" to weep for his people, and he also wrote the book of Lamentations.",
-    ["jeremiah", "lamentations"],
   ),
   q(
     "pr-008",
@@ -92,17 +50,6 @@ export const prophetsQuestions = [
     ["daniel", "belshazzar", "writing on the wall"],
   ),
   q(
-    "pr-009",
-    "old",
-    "hard",
-    "Which prophet was told to marry Gomer as a living picture of Israel's unfaithfulness to God?",
-    ["Hosea", "Joel", "Obadiah", "Zechariah"],
-    0,
-    "Hosea 1:2-3",
-    "Hosea's marriage to unfaithful Gomer pictured Israel's spiritual adultery — and God's persistent, redeeming love.",
-    ["hosea", "gomer"],
-  ),
-  q(
     "pr-010",
     "old",
     "hard",
@@ -112,17 +59,6 @@ export const prophetsQuestions = [
     "Amos 1:1; 7:14-15",
     "Amos said, \"I was no prophet... but I was an herdman\" — God took him from following the flock and sent him to prophesy to Israel.",
     ["amos", "tekoa"],
-  ),
-  q(
-    "pr-011",
-    "old",
-    "easy",
-    "Which prophet was fed bread and meat by ravens beside the brook Cherith?",
-    ["Elijah", "Elisha", "Obadiah", "Nathan"],
-    0,
-    "1 Kings 17:6",
-    "When Elijah hid by the brook Cherith, the LORD commanded ravens to bring him bread and flesh morning and evening.",
-    ["elijah", "ravens", "provision"],
   ),
   q(
     "pr-012",
@@ -136,17 +72,6 @@ export const prophetsQuestions = [
     ["nathan", "david", "repentance"],
   ),
   q(
-    "pr-013",
-    "old",
-    "medium",
-    "Which captive in Babylon interpreted King Nebuchadnezzar's dream of a great statue?",
-    ["Daniel", "Ezekiel", "Jeremiah", "Habakkuk"],
-    0,
-    "Daniel 2:27-28",
-    "When the wise men failed, Daniel revealed and interpreted the king's dream, giving all glory to the God of heaven.",
-    ["daniel", "nebuchadnezzar", "dream"],
-  ),
-  q(
     "pr-014",
     "old",
     "medium",
@@ -156,17 +81,6 @@ export const prophetsQuestions = [
     "Isaiah 6:1-3",
     "Isaiah beheld the Lord upon a throne, the temple filled with His glory, and seraphim proclaiming His holiness.",
     ["isaiah", "vision", "holy"],
-  ),
-  q(
-    "pr-015",
-    "new",
-    "easy",
-    "Which prophet baptized people in the Jordan and pointed them to the coming Messiah?",
-    ["John the Baptist", "Elijah", "Malachi", "Elisha"],
-    0,
-    "Matthew 3:1-3",
-    "John the Baptist preached repentance in the wilderness and prepared the way of the Lord, as Isaiah had foretold.",
-    ["john the baptist", "messiah"],
   ),
   q(
     "pr-016",
@@ -180,17 +94,6 @@ export const prophetsQuestions = [
     ["micah", "bethlehem", "messiah"],
   ),
   q(
-    "pr-017",
-    "old",
-    "medium",
-    "Which prophet was given the great truth that 'the just shall live by his faith'?",
-    ["Habakkuk", "Zephaniah", "Haggai", "Malachi"],
-    0,
-    "Habakkuk 2:4",
-    "Habakkuk wrestled with God over injustice and received the answer that the righteous live by faith, later quoted by Paul.",
-    ["habakkuk", "faith"],
-  ),
-  q(
     "pr-018",
     "old",
     "hard",
@@ -200,17 +103,6 @@ export const prophetsQuestions = [
     "Joel 2:28",
     "Joel prophesied that God would pour out His Spirit on all flesh, a promise Peter said was fulfilled at Pentecost.",
     ["joel", "spirit", "pentecost"],
-  ),
-  q(
-    "pr-019",
-    "old",
-    "hard",
-    "Which prophet, alongside Zechariah, stirred the people to rebuild the temple after the exile?",
-    ["Haggai", "Nahum", "Obadiah", "Habakkuk"],
-    0,
-    "Haggai 1:14",
-    "Haggai rebuked the people for neglecting God's house and encouraged them, so they rose up and rebuilt the temple.",
-    ["haggai", "temple", "rebuilding"],
   ),
   q(
     "pr-020",

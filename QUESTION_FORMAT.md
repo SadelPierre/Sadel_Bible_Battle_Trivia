@@ -34,7 +34,30 @@ Content rules enforced by review + validation:
 
 ## Where questions live
 
-`src/features/questions/data/<category>.ts` — one file per category, aggregated by `bank.ts`. The seed bank ships **150 reviewed questions** (10 per category × 15 categories).
+The bank ships **300 reviewed questions** (20 per category × 15 categories), split
+into two pools that never overlap:
+
+| Pool | Files | Aggregator | Used by |
+| --- | --- | --- | --- |
+| Offline | `src/features/questions/data/offline/<category>.ts` | `offline-bank.ts` → `OFFLINE_QUESTION_BANK` | Solo, Local |
+| Online | `src/features/questions/data/online/<category>.ts` | `bank.ts` → `ONLINE_QUESTION_BANK` (`server-only`) | online rooms, tournaments |
+
+Each pool holds 10 questions per category, so both cover every category and
+difficulty.
+
+**Why the split.** Solo and Local grade answers on the device — they have to keep
+working with no network — so their questions reach the browser complete with
+`correctAnswerIndex`. Anyone can read them out of a JavaScript chunk. Online
+snapshots go to some trouble to withhold the correct answer until reveal, and
+that is pointless for any question the client already has a copy of. So a
+question a browser can read never decides a competitive match.
+
+The two pools live in separate module trees rather than being filtered out of
+one array at runtime: filtering would still ship every question. `bank.ts` also
+imports `server-only`, so a client importing the online pool is a build error
+rather than a silent leak. `QUESTION_BANK` (both pools) exists for validation,
+admin tooling and seeding only — never for choosing a live match's questions.
+A unit test asserts the pools stay disjoint.
 
 ## Admin workflow (protected — local CLI, never exposed in the app)
 
@@ -50,7 +73,7 @@ npm run db:seed                              # upsert bank into Supabase bible_q
 
 ### Adding a question
 
-1. Open the category file (or create a new one and register it in `bank.ts`).
+1. Open the category file in the pool you are extending — `data/offline/<category>.ts` or `data/online/<category>.ts` (or create a new one and register it in both `offline-bank.ts` and `bank.ts`). Keep the two pools balanced, and never copy a question from one into the other.
 2. Add an entry with the factory `q(id, testament, difficulty, question, options, 0, reference, explanation, tags, excerpt?)` — put the correct answer **first**.
 3. Run `npm run questions:admin -- validate` (also runs in `npm test`).
 4. Set `isReviewed` true only after a human has checked the reference.

@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("new-testament");
 
 export const newTestamentQuestions = [
-  q(
-    "nt-001",
-    "new",
-    "easy",
-    "In which town was Jesus born?",
-    ["Bethlehem", "Nazareth", "Jerusalem", "Capernaum"],
-    0,
-    "Matthew 2:1",
-    "Jesus was born in Bethlehem of Judaea in the days of Herod the king, fulfilling the prophecy of Micah 5:2.",
-    ["birth", "bethlehem", "christmas"],
-  ),
   q(
     "nt-002",
     "new",
@@ -24,17 +15,6 @@ export const newTestamentQuestions = [
     "Luke 6:13",
     "Jesus called His disciples and chose twelve of them, whom He also named apostles.",
     ["apostles", "disciples"],
-  ),
-  q(
-    "nt-003",
-    "new",
-    "easy",
-    "Who baptized Jesus in the Jordan River?",
-    ["John the Baptist", "Peter", "Andrew", "Philip"],
-    0,
-    "Matthew 3:13-17",
-    "Jesus came from Galilee to be baptized by John. As He came up from the water, the Spirit descended like a dove and the Father spoke from heaven.",
-    ["baptism", "john the baptist"],
   ),
   q(
     "nt-004",
@@ -48,17 +28,6 @@ export const newTestamentQuestions = [
     ["peter", "denial"],
   ),
   q(
-    "nt-005",
-    "new",
-    "medium",
-    "On which day did the Holy Spirit descend on the disciples in Jerusalem?",
-    ["Pentecost", "Passover", "The Sabbath", "The Feast of Tabernacles"],
-    0,
-    "Acts 2:1-4",
-    "On the day of Pentecost the disciples were filled with the Holy Spirit and began to speak in other languages as the Spirit enabled them.",
-    ["pentecost", "holy spirit"],
-  ),
-  q(
     "nt-006",
     "new",
     "medium",
@@ -68,17 +37,6 @@ export const newTestamentQuestions = [
     "Acts 7:59-60",
     "Stephen, one of the seven chosen to serve, was stoned after boldly preaching Christ. He prayed for his attackers as he died.",
     ["stephen", "martyr"],
-  ),
-  q(
-    "nt-007",
-    "new",
-    "medium",
-    "What was the apostle Paul called before he began following Jesus?",
-    ["Saul", "Silas", "Simon", "Stephanas"],
-    0,
-    "Acts 13:9",
-    "Saul of Tarsus persecuted the church until he met Jesus on the Damascus road. He is also called Paul from Acts 13 onward.",
-    ["paul", "saul", "conversion"],
   ),
   q(
     "nt-008",
@@ -92,17 +50,6 @@ export const newTestamentQuestions = [
     ["thomas", "resurrection", "doubt"],
   ),
   q(
-    "nt-009",
-    "new",
-    "hard",
-    "On which island was John when he received the visions of Revelation?",
-    ["Patmos", "Cyprus", "Crete", "Malta"],
-    0,
-    "Revelation 1:9",
-    "John wrote that he was on the isle called Patmos \"for the word of God, and for the testimony of Jesus Christ\" when he received the Revelation.",
-    ["john", "revelation", "patmos"],
-  ),
-  q(
     "nt-010",
     "new",
     "hard",
@@ -114,17 +61,6 @@ export const newTestamentQuestions = [
     ["eutychus", "paul", "troas"],
   ),
   q(
-    "nt-011",
-    "new",
-    "easy",
-    "Whom did Jesus call to follow Him while he sat at the receipt of custom collecting taxes?",
-    ["Matthew", "Zacchaeus", "Nicodemus", "Bartimaeus"],
-    0,
-    "Matthew 9:9",
-    "As Jesus passed by, He saw Matthew (also called Levi) at the tax booth and said, \"Follow me.\" Matthew rose and followed Him.",
-    ["matthew", "calling", "tax collector"],
-  ),
-  q(
     "nt-012",
     "new",
     "easy",
@@ -134,17 +70,6 @@ export const newTestamentQuestions = [
     "Matthew 28:19",
     "Jesus commanded, \"Go ye therefore, and teach all nations, baptizing them in the name of the Father, and of the Son, and of the Holy Ghost.\"",
     ["great commission", "nations"],
-  ),
-  q(
-    "nt-013",
-    "new",
-    "easy",
-    "Which apostle wrote more of the New Testament letters (epistles) than anyone else?",
-    ["Paul", "Peter", "John", "James"],
-    0,
-    "Romans 1:1",
-    "The apostle Paul wrote at least thirteen letters of the New Testament, from Romans through Philemon, teaching and encouraging the young churches.",
-    ["paul", "epistles"],
   ),
   q(
     "nt-014",
@@ -163,22 +88,6 @@ export const newTestamentQuestions = [
     ["saul", "damascus", "conversion"],
   ),
   q(
-    "nt-015",
-    "new",
-    "medium",
-    "Which couple fell down dead after lying to the Holy Spirit about the price of land they sold?",
-    [
-      "Ananias and Sapphira",
-      "Aquila and Priscilla",
-      "Herod and Bernice",
-      "Felix and Drusilla",
-    ],
-    0,
-    "Acts 5:1-10",
-    "Ananias and his wife Sapphira kept back part of the money but claimed to give it all. Peter said they had lied to God, and each fell dead in turn.",
-    ["ananias", "sapphira", "early church"],
-  ),
-  q(
     "nt-016",
     "new",
     "medium",
@@ -195,17 +104,6 @@ export const newTestamentQuestions = [
     ["philip", "ethiopian eunuch", "baptism"],
   ),
   q(
-    "nt-017",
-    "new",
-    "medium",
-    "Which Roman centurion and his household received the Holy Spirit as Peter preached to them?",
-    ["Cornelius", "Julius", "Claudius", "Cornelius' servant"],
-    0,
-    "Acts 10:44-48",
-    "As Peter spoke, the Holy Ghost fell on Cornelius and all who heard, showing that God grants salvation to Gentiles as well as Jews.",
-    ["cornelius", "gentiles", "peter"],
-  ),
-  q(
     "nt-018",
     "new",
     "easy",
@@ -215,17 +113,6 @@ export const newTestamentQuestions = [
     "New Testament",
     "The New Testament contains twenty-seven books, from the Gospel of Matthew through the book of Revelation.",
     ["canon", "books"],
-  ),
-  q(
-    "nt-019",
-    "new",
-    "hard",
-    "On which island were Paul and the ship's company shipwrecked on their way to Rome?",
-    ["Melita (Malta)", "Cyprus", "Crete", "Patmos"],
-    0,
-    "Acts 28:1",
-    "After the storm, all escaped safely to land. Paul then learned the island was called Melita, known today as Malta.",
-    ["paul", "shipwreck", "malta"],
   ),
   q(
     "nt-020",

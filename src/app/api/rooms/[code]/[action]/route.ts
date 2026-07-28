@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import {
   addBot,
@@ -13,9 +12,9 @@ import {
   submitAnswer,
   updateSettings,
 } from "@/features/online/server";
-import { errorResponse } from "@/features/online/http";
+import { credentialsFromRequest, errorResponse, jsonResponse } from "@/features/online/http";
 import { isSupabaseServerConfigured } from "@/lib/supabase/admin";
-import { clientKey, rateLimit } from "@/lib/rateLimit";
+import { clientKey, rateLimit, rateLimitDurable } from "@/lib/rateLimit";
 import { displayNameSchema, isValidRoomCode, normalizeRoomCode } from "@/lib/validation";
 import {
   ALL_CATEGORIES,
@@ -49,27 +48,25 @@ type Params = { params: Promise<{ code: string; action: string }> };
 
 export async function GET(req: Request, { params }: Params) {
   if (!isSupabaseServerConfigured()) {
-    return NextResponse.json({ error: "Online play is not configured.", code: "not_configured" }, { status: 503 });
+    return jsonResponse({ error: "Online play is not configured.", code: "not_configured" }, 503);
   }
   const { code: rawCode, action } = await params;
   const code = normalizeRoomCode(rawCode);
   if (!isValidRoomCode(code)) {
-    return NextResponse.json({ error: "Invalid room code.", code: "invalid_code" }, { status: 400 });
+    return jsonResponse({ error: "Invalid room code.", code: "invalid_code" }, 400);
   }
   if (action !== "state") {
-    return NextResponse.json({ error: "Unknown action.", code: "unknown_action" }, { status: 404 });
+    return jsonResponse({ error: "Unknown action.", code: "unknown_action" }, 404);
   }
+  // Polling is frequent and creates nothing durable, so the in-memory burst
+  // damper is the right tool here — a database round trip per poll is not.
   if (!rateLimit(clientKey(req, "state"), 240)) {
-    return NextResponse.json({ error: "Too many requests.", code: "rate_limited" }, { status: 429 });
+    return jsonResponse({ error: "Too many requests.", code: "rate_limited" }, 429);
   }
   try {
-    const url = new URL(req.url);
-    const snapshot = await heartbeatAndSnapshot(
-      code,
-      url.searchParams.get("playerId"),
-      url.searchParams.get("token"),
-    );
-    return NextResponse.json(snapshot);
+    const { playerId, token } = credentialsFromRequest(req);
+    const snapshot = await heartbeatAndSnapshot(code, playerId, token);
+    return jsonResponse(snapshot);
   } catch (err) {
     return errorResponse(err);
   }
@@ -77,15 +74,20 @@ export async function GET(req: Request, { params }: Params) {
 
 export async function POST(req: Request, { params }: Params) {
   if (!isSupabaseServerConfigured()) {
-    return NextResponse.json({ error: "Online play is not configured.", code: "not_configured" }, { status: 503 });
+    return jsonResponse({ error: "Online play is not configured.", code: "not_configured" }, 503);
   }
   const { code: rawCode, action } = await params;
   const code = normalizeRoomCode(rawCode);
   if (!isValidRoomCode(code)) {
-    return NextResponse.json({ error: "Invalid room code.", code: "invalid_code" }, { status: 400 });
+    return jsonResponse({ error: "Invalid room code.", code: "invalid_code" }, 400);
   }
-  if (!rateLimit(clientKey(req, `post-${action}`), 120)) {
-    return NextResponse.json({ error: "Too many requests.", code: "rate_limited" }, { status: 429 });
+  const key = clientKey(req, `post-${action}`);
+  const tooMany = { error: "Too many requests.", code: "rate_limited" };
+  if (!rateLimit(key, 120)) return jsonResponse(tooMany, 429);
+  // Joining is the other unauthenticated path that creates a durable row, so it
+  // gets the shared limit too. In-game actions are already token-gated.
+  if (action === "join" && !(await rateLimitDurable(key, 30))) {
+    return jsonResponse(tooMany, 429);
   }
 
   try {
@@ -101,59 +103,59 @@ export async function POST(req: Request, { params }: Params) {
             sessionId: z.string().uuid(),
           })
           .parse(body);
-        return NextResponse.json(await joinRoom(code, parsed));
+        return jsonResponse(await joinRoom(code, parsed));
       }
       case "ready": {
         const parsed = authSchema.extend({ ready: z.boolean() }).parse(body);
         await setReady(code, parsed.playerId, parsed.token, parsed.ready);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       case "settings": {
         const parsed = authSchema.extend({ settings: settingsSchema }).parse(body);
         await updateSettings(code, parsed.playerId, parsed.token, parsed.settings as GameSettings);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       case "add-bot": {
         const parsed = authSchema
           .extend({ difficulty: z.enum(["easy", "medium", "hard"]) })
           .parse(body);
         await addBot(code, parsed.playerId, parsed.token, parsed.difficulty);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       case "remove-player": {
         const parsed = authSchema.extend({ targetId: z.string().uuid() }).parse(body);
         await removePlayer(code, parsed.playerId, parsed.token, parsed.targetId);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       case "start": {
         const parsed = authSchema.parse(body);
         await startGame(code, parsed.playerId, parsed.token);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       case "answer": {
         const parsed = authSchema
           .extend({ answerIndex: z.number().int().min(0).max(3) })
           .parse(body);
         await submitAnswer(code, parsed.playerId, parsed.token, parsed.answerIndex);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       case "advance": {
         const parsed = authSchema.parse(body);
         await advancePhase(code, parsed.playerId, parsed.token);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       case "rematch": {
         const parsed = authSchema.parse(body);
         await rematch(code, parsed.playerId, parsed.token);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       case "lobby": {
         const parsed = authSchema.parse(body);
         await returnToLobby(code, parsed.playerId, parsed.token);
-        return NextResponse.json({ ok: true });
+        return jsonResponse({ ok: true });
       }
       default:
-        return NextResponse.json({ error: "Unknown action.", code: "unknown_action" }, { status: 404 });
+        return jsonResponse({ error: "Unknown action.", code: "unknown_action" }, 404);
     }
   } catch (err) {
     return errorResponse(err);

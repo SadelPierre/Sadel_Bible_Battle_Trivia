@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("women-of-the-bible");
 
 export const womenOfTheBibleQuestions = [
-  q(
-    "wb-001",
-    "old",
-    "easy",
-    "Who was the first woman, called the mother of all living?",
-    ["Eve", "Sarah", "Rebekah", "Rachel"],
-    0,
-    "Genesis 3:20",
-    "Adam called his wife's name Eve, \"because she was the mother of all living.\"",
-    ["eve", "creation"],
-  ),
   q(
     "wb-002",
     "old",
@@ -24,17 +15,6 @@ export const womenOfTheBibleQuestions = [
     "Ruth 1:16; 2:2-3",
     "Ruth the Moabitess refused to leave Naomi, gleaned to feed them both, and became the great-grandmother of King David.",
     ["ruth", "naomi", "boaz"],
-  ),
-  q(
-    "wb-003",
-    "old",
-    "easy",
-    "Which prophetess, the sister of Moses and Aaron, led Israel's women in song after crossing the sea?",
-    ["Miriam", "Deborah", "Huldah", "Zipporah"],
-    0,
-    "Exodus 15:20-21",
-    "Miriam the prophetess took a timbrel, and the women followed her, singing, \"Sing ye to the LORD, for he hath triumphed gloriously.\"",
-    ["miriam", "song", "exodus"],
   ),
   q(
     "wb-004",
@@ -48,17 +28,6 @@ export const womenOfTheBibleQuestions = [
     ["hannah", "samuel", "prayer"],
   ),
   q(
-    "wb-005",
-    "old",
-    "medium",
-    "Which prophetess judged Israel and went with Barak to battle against Sisera's army?",
-    ["Deborah", "Jael", "Miriam", "Esther"],
-    0,
-    "Judges 4:4-9",
-    "Deborah, a prophetess, judged Israel under a palm tree and told Barak that God would deliver Sisera's army — and He did.",
-    ["deborah", "judges", "barak"],
-  ),
-  q(
     "wb-006",
     "new",
     "medium",
@@ -70,17 +39,6 @@ export const womenOfTheBibleQuestions = [
     ["elizabeth", "john the baptist"],
   ),
   q(
-    "wb-007",
-    "new",
-    "medium",
-    "Which seller of purple cloth believed Paul's message and was baptized at Philippi?",
-    ["Lydia", "Priscilla", "Phebe", "Dorcas"],
-    0,
-    "Acts 16:14-15",
-    "Lydia of Thyatira, a seller of purple, listened to Paul by the riverside; the Lord opened her heart, and her household was baptized.",
-    ["lydia", "philippi", "paul"],
-  ),
-  q(
     "wb-008",
     "new",
     "easy",
@@ -90,17 +48,6 @@ export const womenOfTheBibleQuestions = [
     "Luke 10:38-39; John 11:1",
     "Martha served while Mary sat at Jesus' feet. Their brother Lazarus was later raised from the dead by Jesus.",
     ["mary", "martha", "bethany"],
-  ),
-  q(
-    "wb-009",
-    "old",
-    "hard",
-    "Who hid the two Israelite spies under stalks of flax on her roof in Jericho?",
-    ["Rahab", "Jael", "Michal", "Zipporah"],
-    0,
-    "Joshua 2:1-6",
-    "Rahab hid the spies and confessed faith in Israel's God. She and her family were spared, and she appears in the family line of Jesus (Matthew 1:5).",
-    ["rahab", "jericho", "spies"],
   ),
   q(
     "wb-010",
@@ -119,17 +66,6 @@ export const womenOfTheBibleQuestions = [
     ["dorcas", "tabitha", "peter"],
   ),
   q(
-    "wb-011",
-    "new",
-    "easy",
-    "Who was the first person to see the risen Jesus at the empty tomb?",
-    ["Mary Magdalene", "Mary the mother of Jesus", "Martha", "Joanna"],
-    0,
-    "John 20:14-16",
-    "Mary Magdalene stood weeping at the tomb until Jesus spoke her name, and she became the first witness of His resurrection.",
-    ["mary magdalene", "resurrection"],
-  ),
-  q(
     "wb-012",
     "old",
     "medium",
@@ -139,17 +75,6 @@ export const womenOfTheBibleQuestions = [
     "Judges 4:21",
     "Jael welcomed the fleeing Sisera into her tent, and while he slept she drove a nail through his temples, fulfilling Deborah's word.",
     ["jael", "sisera"],
-  ),
-  q(
-    "wb-013",
-    "old",
-    "medium",
-    "Which wise woman kept David from bloodshed with a gift of food and later became his wife?",
-    ["Abigail", "Michal", "Ahinoam", "Bathsheba"],
-    0,
-    "1 Samuel 25:23-42",
-    "Abigail met David with provisions and humble words, turning away his anger against her foolish husband Nabal.",
-    ["abigail", "david", "wisdom"],
   ),
   q(
     "wb-014",
@@ -163,17 +88,6 @@ export const womenOfTheBibleQuestions = [
     ["moses", "pharaoh's daughter"],
   ),
   q(
-    "wb-015",
-    "old",
-    "easy",
-    "Who was the wife of Isaac and the mother of the twins Jacob and Esau?",
-    ["Rebekah", "Sarah", "Rachel", "Leah"],
-    0,
-    "Genesis 25:21-26",
-    "Rebekah conceived after Isaac prayed, and the LORD told her that two nations were in her womb: Jacob and Esau.",
-    ["rebekah", "isaac"],
-  ),
-  q(
     "wb-016",
     "new",
     "medium",
@@ -185,17 +99,6 @@ export const womenOfTheBibleQuestions = [
     ["samaritan woman", "living water"],
   ),
   q(
-    "wb-017",
-    "old",
-    "hard",
-    "Which two midwives feared God and refused Pharaoh's command to kill the Hebrew baby boys?",
-    ["Shiphrah and Puah", "Jochebed and Miriam", "Rachel and Leah", "Naomi and Ruth"],
-    0,
-    "Exodus 1:15-17",
-    "The midwives Shiphrah and Puah feared God and let the boys live, and God dealt well with them for it.",
-    ["shiphrah", "puah", "midwives"],
-  ),
-  q(
     "wb-018",
     "old",
     "medium",
@@ -205,17 +108,6 @@ export const womenOfTheBibleQuestions = [
     "Genesis 29:20-28",
     "Jacob served seven years for Rachel, was given Leah instead, and then served seven more years for Rachel, whom he loved.",
     ["rachel", "jacob"],
-  ),
-  q(
-    "wb-019",
-    "old",
-    "easy",
-    "Who was Ruth's mother-in-law who returned from Moab to Bethlehem?",
-    ["Naomi", "Orpah", "Rahab", "Elisabeth"],
-    0,
-    "Ruth 1:22",
-    "Naomi returned to Bethlehem with her faithful daughter-in-law Ruth as the barley harvest was beginning.",
-    ["naomi", "ruth"],
   ),
   q(
     "wb-020",

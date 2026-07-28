@@ -1,4 +1,7 @@
-import { makeQuestionFactory } from "./helpers";
+// OFFLINE pool — shipped to the browser for Solo and Local play.
+// These questions carry their answer key into the client bundle and must
+// therefore never appear in a competitive online match. See ../online/.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("miracles");
 
@@ -20,17 +23,6 @@ export const miraclesQuestions = [
     ["feeding", "loaves", "fish"],
   ),
   q(
-    "mi-002",
-    "old",
-    "easy",
-    "Which sea did God part so Israel could cross on dry ground?",
-    ["The Red Sea", "The Dead Sea", "The Sea of Galilee", "The Great Sea"],
-    0,
-    "Exodus 14:21-22",
-    "God sent a strong east wind that divided the Red Sea, and Israel walked through on dry ground with the waters as a wall on either side.",
-    ["red sea", "exodus"],
-  ),
-  q(
     "mi-003",
     "new",
     "easy",
@@ -42,18 +34,6 @@ export const miraclesQuestions = [
     ["lazarus", "resurrection"],
   ),
   q(
-    "mi-004",
-    "new",
-    "easy",
-    "What did Jesus calm by saying, \"Peace, be still\"?",
-    ["A storm on the sea", "An angry crowd", "A herd of animals", "A burning building"],
-    0,
-    "Mark 4:37-39",
-    "A great storm arose on the Sea of Galilee while Jesus slept. He rebuked the wind and the sea, and there was a great calm.",
-    ["storm", "galilee"],
-    "And he arose, and rebuked the wind, and said unto the sea, Peace, be still.",
-  ),
-  q(
     "mi-005",
     "old",
     "medium",
@@ -63,17 +43,6 @@ export const miraclesQuestions = [
     "Joshua 6:20",
     "After Israel circled Jericho as God commanded, the people shouted, the trumpets sounded, and the wall fell down flat.",
     ["jericho", "joshua"],
-  ),
-  q(
-    "mi-006",
-    "new",
-    "medium",
-    "Which disciple stepped out of the boat and walked on water toward Jesus?",
-    ["Peter", "John", "James", "Andrew"],
-    0,
-    "Matthew 14:28-31",
-    "Peter walked on the water to go to Jesus, but when he saw the wind he was afraid and began to sink, and Jesus caught him.",
-    ["peter", "walking on water"],
   ),
   q(
     "mi-007",
@@ -92,17 +61,6 @@ export const miraclesQuestions = [
     ["blind", "siloam"],
   ),
   q(
-    "mi-008",
-    "old",
-    "medium",
-    "What fell from heaven when Elijah prayed on Mount Carmel?",
-    ["Fire", "Hailstones", "Manna", "Rain of quail"],
-    0,
-    "1 Kings 18:36-38",
-    "The fire of the LORD fell and consumed Elijah's sacrifice, the wood, the stones, and even the water in the trench, proving the LORD is God.",
-    ["elijah", "carmel", "baal"],
-  ),
-  q(
     "mi-009",
     "old",
     "hard",
@@ -112,17 +70,6 @@ export const miraclesQuestions = [
     "2 Kings 6:5-7",
     "When a borrowed axe head fell into the Jordan, Elisha cast in a stick and the iron floated so it could be recovered.",
     ["elisha", "axe head"],
-  ),
-  q(
-    "mi-010",
-    "old",
-    "hard",
-    "How many men did King Nebuchadnezzar see walking unhurt in the fiery furnace?",
-    ["Four", "Three", "Two", "Five"],
-    0,
-    "Daniel 3:24-25",
-    "Three men were thrown in, but the king saw four walking in the fire, \"and the form of the fourth is like the Son of God.\"",
-    ["furnace", "shadrach", "daniel"],
   ),
   q(
     "mi-011",
@@ -136,17 +83,6 @@ export const miraclesQuestions = [
     ["lepers", "thankfulness"],
   ),
   q(
-    "mi-012",
-    "new",
-    "easy",
-    "Whose mother-in-law did Jesus heal of a fever with a touch of His hand?",
-    ["Peter's", "Andrew's", "Matthew's", "Jairus'"],
-    0,
-    "Mark 1:30-31",
-    "Jesus took Simon Peter's mother-in-law by the hand and lifted her up; the fever left her and she rose to serve them.",
-    ["healing", "peter", "fever"],
-  ),
-  q(
     "mi-013",
     "old",
     "easy",
@@ -156,17 +92,6 @@ export const miraclesQuestions = [
     "Exodus 17:6",
     "The LORD told Moses to strike the rock in Horeb, and water came out of it for the people to drink.",
     ["water", "rock", "wilderness"],
-  ),
-  q(
-    "mi-014",
-    "new",
-    "medium",
-    "What did Jesus tell the healed paralysed man to take up and carry home?",
-    ["His bed", "His staff", "His cloak", "His crutch"],
-    0,
-    "Mark 2:11-12",
-    "Jesus said, \"Arise, take up thy bed, and go thy way.\" The man rose immediately and walked out before them all.",
-    ["healing", "paralysed", "forgiveness"],
   ),
   q(
     "mi-015",
@@ -180,22 +105,6 @@ export const miraclesQuestions = [
     ["elijah", "drought", "prayer"],
   ),
   q(
-    "mi-016",
-    "new",
-    "medium",
-    "Which suffering woman was healed simply by touching the border of Jesus' garment?",
-    [
-      "The woman with an issue of blood",
-      "Jairus' daughter",
-      "The widow of Nain",
-      "Mary Magdalene",
-    ],
-    0,
-    "Mark 5:27-29",
-    "A woman ill for twelve years touched Jesus' garment in the crowd and was immediately made whole, for she believed.",
-    ["healing", "faith"],
-  ),
-  q(
     "mi-017",
     "new",
     "medium",
@@ -207,17 +116,6 @@ export const miraclesQuestions = [
     ["zacharias", "john the baptist"],
   ),
   q(
-    "mi-018",
-    "new",
-    "hard",
-    "How many baskets of fragments were gathered after Jesus fed the five thousand?",
-    ["Twelve", "Seven", "Five", "Three"],
-    0,
-    "Matthew 14:20",
-    "All ate and were filled, and the disciples took up twelve baskets full of the leftover fragments.",
-    ["provision", "baskets"],
-  ),
-  q(
     "mi-019",
     "old",
     "hard",
@@ -227,16 +125,5 @@ export const miraclesQuestions = [
     "Numbers 21:8-9",
     "When fiery serpents bit the people, God told Moses to set a serpent of brass on a pole; all who looked to it lived.",
     ["serpent", "wilderness", "healing"],
-  ),
-  q(
-    "mi-020",
-    "new",
-    "hard",
-    "Whose passing shadow did people believe would heal the sick laid in the streets of Jerusalem?",
-    ["Peter's", "Paul's", "John's", "Philip's"],
-    0,
-    "Acts 5:15",
-    "So many were healed through the apostles that people laid the sick in the streets, hoping Peter's shadow might fall on them.",
-    ["peter", "healing", "apostles"],
   ),
 ];

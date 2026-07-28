@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("bible-books");
 
 export const bibleBooksQuestions = [
-  q(
-    "bb-001",
-    "old",
-    "easy",
-    "What is the first book of the Bible?",
-    ["Genesis", "Exodus", "Matthew", "Psalms"],
-    0,
-    "Genesis 1:1",
-    "Genesis, meaning \"beginning,\" opens the Bible with the creation of the heavens and the earth.",
-    ["genesis", "order"],
-  ),
   q(
     "bb-002",
     "new",
@@ -24,17 +15,6 @@ export const bibleBooksQuestions = [
     "Revelation 1:1",
     "Revelation, the record of the visions given to John, closes the Bible with the promise of Christ's return.",
     ["revelation", "order"],
-  ),
-  q(
-    "bb-003",
-    "old",
-    "easy",
-    "Which book is a collection of 150 songs and prayers, many written by David?",
-    ["Psalms", "Proverbs", "Lamentations", "Song of Solomon"],
-    0,
-    "Psalm 23:1",
-    "The book of Psalms contains 150 poetic songs and prayers used in worship, with many attributed to King David.",
-    ["psalms", "david", "poetry"],
   ),
   q(
     "bb-004",
@@ -53,17 +33,6 @@ export const bibleBooksQuestions = [
     ["gospels"],
   ),
   q(
-    "bb-005",
-    "old",
-    "medium",
-    "Which book records Israel's deliverance from slavery in Egypt?",
-    ["Exodus", "Genesis", "Deuteronomy", "Joshua"],
-    0,
-    "Exodus 12:40-41",
-    "Exodus, meaning \"a going out,\" records the plagues, the Passover, and Israel's departure from Egypt under Moses.",
-    ["exodus"],
-  ),
-  q(
     "bb-006",
     "new",
     "medium",
@@ -73,17 +42,6 @@ export const bibleBooksQuestions = [
     "Acts 1:1-8",
     "The Acts of the Apostles, written by Luke, records the coming of the Holy Spirit and the spread of the gospel from Jerusalem outward.",
     ["acts", "early church"],
-  ),
-  q(
-    "bb-007",
-    "old",
-    "medium",
-    "Which book is a collection of wise sayings, largely written by King Solomon?",
-    ["Proverbs", "Ecclesiastes", "Job", "Isaiah"],
-    0,
-    "Proverbs 1:1-7",
-    "Proverbs opens: \"The proverbs of Solomon the son of David, king of Israel.\" Its theme is that the fear of the LORD is the beginning of knowledge.",
-    ["proverbs", "solomon", "wisdom"],
   ),
   q(
     "bb-008",
@@ -97,17 +55,6 @@ export const bibleBooksQuestions = [
     ["esther", "persia"],
   ),
   q(
-    "bb-009",
-    "old",
-    "hard",
-    "Which is the shortest book in the Old Testament, with only twenty-one verses?",
-    ["Obadiah", "Haggai", "Nahum", "Joel"],
-    0,
-    "Obadiah 1:1",
-    "Obadiah, a single chapter of twenty-one verses concerning Edom, is the shortest book in the Old Testament.",
-    ["obadiah", "minor prophets"],
-  ),
-  q(
     "bb-010",
     "new",
     "hard",
@@ -117,17 +64,6 @@ export const bibleBooksQuestions = [
     "Philemon 1:10-16",
     "Paul wrote to Philemon on behalf of Onesimus, urging him to receive Onesimus back \"not now as a servant, but above a servant, a brother beloved.\"",
     ["philemon", "onesimus", "paul"],
-  ),
-  q(
-    "bb-011",
-    "old",
-    "easy",
-    "Which book opens with the account of creation and the lives of Abraham, Isaac, and Jacob?",
-    ["Genesis", "Exodus", "Numbers", "Joshua"],
-    0,
-    "Genesis 1:1",
-    "Genesis, meaning \"beginning,\" tells of creation, the fall, the flood, and the patriarchs from whom Israel descended.",
-    ["genesis", "patriarchs"],
   ),
   q(
     "bb-012",
@@ -141,17 +77,6 @@ export const bibleBooksQuestions = [
     ["canon", "books"],
   ),
   q(
-    "bb-013",
-    "new",
-    "medium",
-    "Which letter of Paul contains the famous chapter describing love (charity) in chapter 13?",
-    ["1 Corinthians", "Romans", "Galatians", "Hebrews"],
-    0,
-    "1 Corinthians 13:1",
-    "In 1 Corinthians 13, Paul writes that though we have all gifts, without charity we are nothing; the greatest is charity.",
-    ["1 corinthians", "love chapter"],
-  ),
-  q(
     "bb-014",
     "old",
     "medium",
@@ -161,17 +86,6 @@ export const bibleBooksQuestions = [
     "Ruth 1:1",
     "Only two books of the Bible bear women's names: Ruth, a Moabite who joined Israel, and Esther, a queen who saved her people.",
     ["ruth", "esther"],
-  ),
-  q(
-    "bb-015",
-    "old",
-    "medium",
-    "How many books are in the Old Testament?",
-    ["Thirty-nine", "Twenty-seven", "Sixty-six", "Twenty-four"],
-    0,
-    "Old Testament",
-    "The Old Testament contains thirty-nine books, from Genesis through Malachi.",
-    ["canon", "old testament"],
   ),
   q(
     "bb-016",
@@ -185,17 +99,6 @@ export const bibleBooksQuestions = [
     ["matthew", "gospel"],
   ),
   q(
-    "bb-017",
-    "old",
-    "hard",
-    "Which book of a major prophet is often called the Gospel of the Old Testament for its Messianic prophecies?",
-    ["Isaiah", "Jeremiah", "Ezekiel", "Daniel"],
-    0,
-    "Isaiah 53:5",
-    "Isaiah foretold the suffering servant wounded for our transgressions, and much else fulfilled in Christ centuries later.",
-    ["isaiah", "prophecy"],
-  ),
-  q(
     "bb-018",
     "old",
     "medium",
@@ -205,17 +108,6 @@ export const bibleBooksQuestions = [
     "Malachi 1:1",
     "Malachi closes the Old Testament with a promise that God would send a messenger to prepare the way of the Lord.",
     ["malachi", "old testament"],
-  ),
-  q(
-    "bb-019",
-    "old",
-    "hard",
-    "Which short Old Testament book is a series of sorrowful poems mourning the fall of Jerusalem?",
-    ["Lamentations", "Ecclesiastes", "Nahum", "Joel"],
-    0,
-    "Lamentations 1:1",
-    "Lamentations grieves over Jerusalem's destruction, yet in its center declares that God's mercies are new every morning.",
-    ["lamentations", "jerusalem"],
   ),
   q(
     "bb-020",
