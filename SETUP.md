@@ -34,13 +34,29 @@ Open http://localhost:3000. **Play Against Computer** and **Local Multiplayer** 
 2. Click **New project**, pick any name (e.g. `bible-battle-live`), set a database password, choose a region near your players, and create it.
 3. Wait ~2 minutes for provisioning.
 
-## 5. Run the database migration
+## 5. Run the database migrations
 
-1. In the Supabase dashboard, open **SQL Editor** → **New query**.
-2. Open the file `supabase/migrations/0001_init.sql` from this project, copy everything, paste it into the editor, and click **Run**.
-3. You should see "Success. No rows returned". This creates all tables, security policies, and the realtime feed.
+The recommended route is the CLI, which applies the whole chain in order:
 
-*(Alternative for CLI users: `npx supabase db push` with a linked project.)*
+```bash
+npx supabase link --project-ref <your-project-ref>
+npx supabase db push
+```
+
+Doing it by hand instead? Run **every** file in `supabase/migrations/`, in
+filename order, as separate SQL Editor queries:
+
+| # | File | What it adds |
+| --- | --- | --- |
+| 1 | `0001_init.sql` | tables, RLS, the realtime feed, `commit_room_state` |
+| 2 | `0002_tournament.sql` | tournament rooms, the answer inbox |
+| 3 | `20260718032644_advisor_hardening.sql` | explicit deny policies |
+| 4 | `20260718033054_player_membership_versioning.sql` | roster-change versioning |
+| 5 | `20260728120000_review_hardening.sql` | `service_role` grants, atomic question close, transactional room creation, durable rate limiting, retention |
+
+Stopping after the first file leaves tournament mode broken and the server
+without the table privileges it needs. Each file ends with "Success. No rows
+returned".
 
 ## 6. Set environment variables
 
@@ -96,6 +112,7 @@ Then see **DEPLOYMENT.md** to put it on the internet with Vercel.
 ## Troubleshooting
 
 - **"Online play is not configured"** — `.env.local` is missing or incomplete; restart the dev server after editing it.
-- **Room joins fail with "Room not found"** — the migration hasn't been run in the Supabase SQL editor, or the URL/key belong to a different project.
+- **Room joins fail with "Room not found"** — the migrations haven't been run in the Supabase SQL editor, or the URL/key belong to a different project.
+- **Every online action fails with "permission denied"** — migration 5 is missing. New Supabase projects no longer expose new tables to the Data API automatically, and that file contains the `service_role` grants.
 - **Lobby doesn't update instantly** — realtime is a nice-to-have; the game still syncs by polling every 2–4 s. Check that the migration's `alter publication supabase_realtime add table game_events` step succeeded (Database → Replication).
 - **No sound** — browsers block audio until the first click/tap; press any button. Check the 🔊 mute toggle and the ⚙️ volume sliders.

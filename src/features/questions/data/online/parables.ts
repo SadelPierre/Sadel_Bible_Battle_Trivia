@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("parables");
 
 export const parablesQuestions = [
-  q(
-    "pa-001",
-    "new",
-    "easy",
-    "In Jesus' parable, who stopped to help the traveler who had been beaten by robbers?",
-    ["A Samaritan", "A priest", "A Levite", "A Roman soldier"],
-    0,
-    "Luke 10:30-34",
-    "A priest and a Levite passed by, but a Samaritan had compassion, bandaged the man's wounds, and paid for his care at an inn.",
-    ["good samaritan", "compassion"],
-  ),
   q(
     "pa-002",
     "new",
@@ -31,17 +22,6 @@ export const parablesQuestions = [
     ["prodigal son", "forgiveness"],
   ),
   q(
-    "pa-003",
-    "new",
-    "easy",
-    "In Jesus' parable, on what did the wise man build his house?",
-    ["A rock", "Sand", "A hilltop", "A riverbank"],
-    0,
-    "Matthew 7:24-25",
-    "The wise man built on a rock, and his house stood through the storm — a picture of hearing Jesus' sayings and doing them.",
-    ["wise builder", "rock"],
-  ),
-  q(
     "pa-004",
     "new",
     "easy",
@@ -51,22 +31,6 @@ export const parablesQuestions = [
     "Luke 15:8-10",
     "The woman with ten pieces of silver lost one, lit a candle, and swept until she found it — a picture of heaven's joy over one sinner who repents.",
     ["lost coin"],
-  ),
-  q(
-    "pa-005",
-    "new",
-    "medium",
-    "In the parable of the sower, what does the seed that fell on good ground represent?",
-    [
-      "Those who hear the word, keep it, and bear fruit",
-      "Those who hear but are choked by riches",
-      "Those who believe for a while then fall away",
-      "Those from whom the devil takes the word",
-    ],
-    0,
-    "Luke 8:11-15",
-    "Jesus explained that the seed is the word of God, and the good ground pictures honest hearts that keep the word and bring forth fruit with patience.",
-    ["sower", "seed"],
   ),
   q(
     "pa-006",
@@ -80,22 +44,6 @@ export const parablesQuestions = [
     ["lost sheep", "shepherd"],
   ),
   q(
-    "pa-007",
-    "new",
-    "medium",
-    "Jesus said the kingdom of heaven is like a tiny mustard seed that grows into what?",
-    [
-      "A tree where birds lodge in its branches",
-      "A field of wheat",
-      "A great vineyard",
-      "A cedar of Lebanon",
-    ],
-    0,
-    "Matthew 13:31-32",
-    "Though the mustard seed is among the least of seeds, it becomes a tree large enough for the birds of the air to lodge in its branches.",
-    ["mustard seed", "kingdom"],
-  ),
-  q(
     "pa-008",
     "new",
     "medium",
@@ -105,17 +53,6 @@ export const parablesQuestions = [
     "Matthew 25:1-4",
     "The wise took oil in their vessels with their lamps, so they were ready when the bridegroom came — a lesson about being prepared.",
     ["ten virgins", "oil", "readiness"],
-  ),
-  q(
-    "pa-009",
-    "new",
-    "hard",
-    "In the parable of the talents, what did the servant who received one talent do with it?",
-    ["Buried it in the earth", "Traded and doubled it", "Gave it to the poor", "Lost it to thieves"],
-    0,
-    "Matthew 25:18, 24-25",
-    "The fearful servant hid his lord's money in the ground instead of putting it to use, and was called wicked and slothful.",
-    ["talents", "stewardship"],
   ),
   q(
     "pa-010",
@@ -134,17 +71,6 @@ export const parablesQuestions = [
     ["pharisee", "publican", "humility"],
   ),
   q(
-    "pa-011",
-    "new",
-    "easy",
-    "In the parable of the Good Samaritan, what did the Samaritan pour on the wounded man's injuries?",
-    ["Oil and wine", "Water and salt", "Milk and honey", "Balm and myrrh"],
-    0,
-    "Luke 10:34",
-    "The Samaritan had compassion, bound up the traveller's wounds pouring in oil and wine, and paid for his care at an inn.",
-    ["good samaritan", "compassion"],
-  ),
-  q(
     "pa-012",
     "new",
     "easy",
@@ -156,17 +82,6 @@ export const parablesQuestions = [
     ["rich fool", "greed"],
   ),
   q(
-    "pa-013",
-    "new",
-    "easy",
-    "In the parable of the pearl of great price, what did the merchant do to obtain it?",
-    ["Sold all that he had", "Borrowed money", "Traded his ship", "Gave away half his goods"],
-    0,
-    "Matthew 13:45-46",
-    "Finding one pearl of great price, the merchant sold all that he had and bought it, picturing the worth of the kingdom of heaven.",
-    ["pearl", "kingdom"],
-  ),
-  q(
     "pa-014",
     "new",
     "medium",
@@ -176,17 +91,6 @@ export const parablesQuestions = [
     "Matthew 18:27",
     "The king forgave his servant an enormous debt, yet that servant refused to forgive a fellow servant a small sum.",
     ["forgiveness", "mercy"],
-  ),
-  q(
-    "pa-015",
-    "new",
-    "medium",
-    "In the parable of the wheat and the tares, who sowed the tares among the wheat?",
-    ["An enemy", "A hired servant", "The reapers", "A careless sower"],
-    0,
-    "Matthew 13:25",
-    "While men slept, an enemy sowed tares among the wheat. Jesus explained the enemy is the devil, and the harvest is the end of the age.",
-    ["wheat and tares", "kingdom"],
   ),
   q(
     "pa-016",
@@ -205,22 +109,6 @@ export const parablesQuestions = [
     ["great supper", "invitation"],
   ),
   q(
-    "pa-017",
-    "new",
-    "medium",
-    "In the parable of the labourers, did those hired last receive the same wage as those hired first?",
-    [
-      "Yes, each received a penny",
-      "No, they received less",
-      "No, they received more",
-      "They received nothing",
-    ],
-    0,
-    "Matthew 20:9-10",
-    "The householder paid every labourer a penny, whether hired early or late, teaching that God is generous by His own grace.",
-    ["labourers", "vineyard", "grace"],
-  ),
-  q(
     "pa-018",
     "new",
     "hard",
@@ -230,17 +118,6 @@ export const parablesQuestions = [
     "Luke 16:22",
     "The beggar Lazarus died and was carried by angels into Abraham's bosom, while the rich man was in torment.",
     ["lazarus", "rich man"],
-  ),
-  q(
-    "pa-019",
-    "new",
-    "hard",
-    "In the parable of the barren fig tree, how many years had the owner sought fruit before wanting to cut it down?",
-    ["Three years", "Seven years", "Two years", "Five years"],
-    0,
-    "Luke 13:7",
-    "The owner had come three years seeking fruit and found none, but the dresser pleaded for one more year of care.",
-    ["fig tree", "patience"],
   ),
   q(
     "pa-020",

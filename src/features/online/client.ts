@@ -21,6 +21,7 @@ export class OnlineError extends Error {
 async function api<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(path, {
     ...init,
+    cache: "no-store",
     headers: { "content-type": "application/json", ...init?.headers },
   });
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
@@ -35,6 +36,16 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export type RoomCredentials = { playerId: string; token: string };
+
+/**
+ * Room credentials travel in the Authorization header, never in the URL.
+ * Query strings are retained by proxy access logs, error trackers and support
+ * captures, and this token is enough to act as the player — or, for a host, to
+ * control the whole room.
+ */
+function authHeader(creds: RoomCredentials | null): Record<string, string> {
+  return creds ? { authorization: `Bearer ${creds.playerId}.${creds.token}` } : {};
+}
 
 const credsKey = (code: string) => `bbl-room-${code}`;
 
@@ -57,16 +68,31 @@ export function clearCredentials(code: string): void {
 
 export type IdentityInput = { name: string; avatar: string; color: string };
 
+/**
+ * Retry key for room creation. Held until a create succeeds, so a double tap or
+ * a retry after a lost response returns the room the first attempt made instead
+ * of stranding it and creating another.
+ */
+let pendingCreateId: string | null = null;
+
 export async function createRoomApi(
   identity: IdentityInput,
   opts?: { mode?: "online" | "tournament"; maxPlayers?: number },
 ): Promise<JoinResult> {
   const mode = opts?.mode ?? "online";
   const maxPlayers = opts?.maxPlayers ?? (mode === "tournament" ? 30 : 4);
+  pendingCreateId ??= crypto.randomUUID();
   const result = await api<JoinResult>("/api/rooms", {
     method: "POST",
-    body: JSON.stringify({ ...identity, sessionId: getSessionId(), maxPlayers, mode }),
+    body: JSON.stringify({
+      ...identity,
+      sessionId: getSessionId(),
+      maxPlayers,
+      mode,
+      operationId: pendingCreateId,
+    }),
   });
+  pendingCreateId = null;
   saveCredentials(result.code, { playerId: result.playerId, token: result.token });
   return result;
 }
@@ -89,8 +115,7 @@ export async function fetchSnapshot(
   code: string,
   creds: RoomCredentials | null,
 ): Promise<RoomSnapshot> {
-  const qs = creds ? `?playerId=${creds.playerId}&token=${creds.token}` : "";
-  return api<RoomSnapshot>(`/api/rooms/${code}/state${qs}`);
+  return api<RoomSnapshot>(`/api/rooms/${code}/state`, { headers: authHeader(creds) });
 }
 
 function action(code: string, name: string, creds: RoomCredentials, extra: object = {}) {

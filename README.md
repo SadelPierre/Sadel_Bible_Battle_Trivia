@@ -34,8 +34,10 @@ Solo and local multiplayer work with **zero configuration**:
 ## Enabling online multiplayer (Supabase)
 
 1. Create a free project at [supabase.com](https://supabase.com) → New project.
-2. In the Supabase dashboard open **SQL Editor**, paste the contents of
-   `supabase/migrations/0001_init.sql`, and run it.
+2. Apply the migrations: `npx supabase link --project-ref <ref> && npx supabase db push`.
+   By hand instead? Run **every** file in `supabase/migrations/` in filename
+   order — see SETUP.md §5. Stopping after the first one leaves tournament mode
+   broken and the server without its table privileges.
 3. Copy `.env.example` to `.env.local` and fill in (Project Settings → API):
    - `NEXT_PUBLIC_SUPABASE_URL` — the Project URL *(safe for the browser)*
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — the publishable key *(safe for the browser; RLS locks it down)*

@@ -49,5 +49,6 @@ vercel --prod
 
 - **Never** expose `SUPABASE_SECRET_KEY` (or the legacy service-role key) with a `NEXT_PUBLIC_` prefix.
 - Online play uses request/response + Supabase Realtime (no server WebSockets), so it works on Vercel's serverless platform without extra configuration.
-- The in-memory rate limiter is per serverless instance; for strict limits add Upstash Redis and swap the implementation in `src/lib/rateLimit.ts`.
+- Rate limiting is two-layer: an in-memory burst damper (per serverless instance, so it multiplies with instance count) in front of a database-backed fixed window shared by every instance. Room creation and joins go through both, because they leave rows behind; polling uses only the in-memory layer, since a database round trip per poll is not worth it. The durable layer fails open if the database is unreachable. Swap `rateLimitDurable` in `src/lib/rateLimit.ts` for Upstash Redis if you would rather not spend the query.
+- Retention runs via `pg_cron` every 15 minutes where available, plus an opportunistic sweep on roughly one room creation in ten. On a plan without `pg_cron`, verify the sweep is keeping up before a large event.
 - Supabase free tier pauses inactive projects after a week of no traffic — open the dashboard to wake it, or upgrade for always-on.

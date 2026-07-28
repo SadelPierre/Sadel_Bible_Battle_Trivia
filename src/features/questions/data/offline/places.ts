@@ -1,4 +1,7 @@
-import { makeQuestionFactory } from "./helpers";
+// OFFLINE pool — shipped to the browser for Solo and Local play.
+// These questions carry their answer key into the client bundle and must
+// therefore never appear in a competitive online match. See ../online/.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("places");
 
@@ -15,17 +18,6 @@ export const placesQuestions = [
     ["eden", "garden"],
   ),
   q(
-    "pl-002",
-    "new",
-    "easy",
-    "In which town did Jesus grow up after returning from Egypt?",
-    ["Nazareth", "Bethlehem", "Jerusalem", "Jericho"],
-    0,
-    "Matthew 2:23",
-    "Joseph settled his family in Nazareth of Galilee, \"that it might be fulfilled... He shall be called a Nazarene.\"",
-    ["nazareth", "childhood"],
-  ),
-  q(
     "pl-003",
     "new",
     "easy",
@@ -37,17 +29,6 @@ export const placesQuestions = [
     ["golgotha", "calvary", "crucifixion"],
   ),
   q(
-    "pl-004",
-    "new",
-    "medium",
-    "In which river was Jesus baptized?",
-    ["The Jordan", "The Nile", "The Euphrates", "The Kishon"],
-    0,
-    "Matthew 3:13",
-    "Jesus came from Galilee to the Jordan River to be baptized by John, setting an example of obedience.",
-    ["jordan", "baptism"],
-  ),
-  q(
     "pl-005",
     "old",
     "medium",
@@ -57,17 +38,6 @@ export const placesQuestions = [
     "Genesis 11:4-9",
     "At Babel the people tried to build a tower to heaven for their own name. God confounded their language and scattered them abroad.",
     ["babel", "languages"],
-  ),
-  q(
-    "pl-006",
-    "new",
-    "medium",
-    "In which city were the disciples first called Christians?",
-    ["Antioch", "Jerusalem", "Rome", "Corinth"],
-    0,
-    "Acts 11:26",
-    "Barnabas and Saul taught for a whole year in Antioch, \"and the disciples were called Christians first in Antioch.\"",
-    ["antioch", "christians"],
   ),
   q(
     "pl-007",
@@ -86,17 +56,6 @@ export const placesQuestions = [
     ["sodom", "gomorrah", "lot"],
   ),
   q(
-    "pl-008",
-    "old",
-    "easy",
-    "The walls of which city fell down after Israel marched around it for seven days?",
-    ["Jericho", "Ai", "Hebron", "Gibeon"],
-    0,
-    "Joshua 6:1-5, 20",
-    "Jericho was the first city Israel conquered in Canaan, taken not by siege engines but by obedience to God's unusual battle plan.",
-    ["jericho"],
-  ),
-  q(
     "pl-009",
     "new",
     "hard",
@@ -106,17 +65,6 @@ export const placesQuestions = [
     "Acts 17:22-23",
     "In Athens, Paul stood on the Areopagus (Mars' hill) and proclaimed the God the Athenians worshiped as unknown.",
     ["athens", "areopagus", "paul"],
-  ),
-  q(
-    "pl-010",
-    "old",
-    "hard",
-    "On which mountains did Noah's ark come to rest as the floodwaters receded?",
-    ["Ararat", "Sinai", "Moriah", "Hermon"],
-    0,
-    "Genesis 8:4",
-    "In the seventh month, the ark rested upon the mountains of Ararat.",
-    ["ararat", "ark", "flood"],
   ),
   q(
     "pl-011",
@@ -130,17 +78,6 @@ export const placesQuestions = [
     ["jerusalem", "temple"],
   ),
   q(
-    "pl-012",
-    "new",
-    "easy",
-    "Beside which sea did Jesus call fishermen to follow Him and later still a great storm?",
-    ["The Sea of Galilee", "The Dead Sea", "The Red Sea", "The Mediterranean Sea"],
-    0,
-    "Matthew 4:18",
-    "Walking by the Sea of Galilee, Jesus called Simon Peter and Andrew, who were casting a net, to become fishers of men.",
-    ["galilee", "fishermen"],
-  ),
-  q(
     "pl-013",
     "old",
     "medium",
@@ -150,17 +87,6 @@ export const placesQuestions = [
     "1 Kings 18:19-38",
     "On Mount Carmel the fire of the LORD fell and consumed Elijah's sacrifice, proving the LORD to be God before all Israel.",
     ["carmel", "elijah", "baal"],
-  ),
-  q(
-    "pl-014",
-    "old",
-    "medium",
-    "In which city did Daniel serve during the years of Judah's captivity?",
-    ["Babylon", "Nineveh", "Susa", "Damascus"],
-    0,
-    "Daniel 1:1-6",
-    "Daniel and his companions were carried to Babylon, where they served in the king's court while remaining faithful to God.",
-    ["babylon", "daniel", "captivity"],
   ),
   q(
     "pl-015",
@@ -174,17 +100,6 @@ export const placesQuestions = [
     ["damascus", "saul"],
   ),
   q(
-    "pl-016",
-    "old",
-    "medium",
-    "In which land was Israel held in slavery before the Exodus?",
-    ["Egypt", "Assyria", "Babylon", "Canaan"],
-    0,
-    "Exodus 1:11-14",
-    "The Egyptians made Israel serve with hard bondage in mortar and brick, until God raised up Moses to deliver them.",
-    ["egypt", "slavery"],
-  ),
-  q(
     "pl-017",
     "new",
     "hard",
@@ -196,17 +111,6 @@ export const placesQuestions = [
     ["corinth", "paul"],
   ),
   q(
-    "pl-018",
-    "new",
-    "hard",
-    "In which city, home to a temple of Diana, did a riot break out against Paul's preaching?",
-    ["Ephesus", "Colossae", "Laodicea", "Smyrna"],
-    0,
-    "Acts 19:23-28",
-    "At Ephesus the silversmiths who made shrines for Diana stirred up a riot, crying, \"Great is Diana of the Ephesians.\"",
-    ["ephesus", "diana", "riot"],
-  ),
-  q(
     "pl-019",
     "new",
     "medium",
@@ -216,16 +120,5 @@ export const placesQuestions = [
     "John 5:2-9",
     "By the pool of Bethesda Jesus told the long-infirm man to rise, take up his bed, and walk, and immediately he was made whole.",
     ["bethesda", "healing"],
-  ),
-  q(
-    "pl-020",
-    "old",
-    "easy",
-    "From which mountain did Moses view the Promised Land before he died?",
-    ["Mount Nebo", "Mount Sinai", "Mount Carmel", "Mount Hermon"],
-    0,
-    "Deuteronomy 34:1-5",
-    "From the top of Mount Nebo the LORD showed Moses all the land of promise, and there Moses died before Israel entered it.",
-    ["nebo", "moses", "promised land"],
   ),
 ];

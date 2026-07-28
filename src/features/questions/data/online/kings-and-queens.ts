@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("kings-and-queens");
 
 export const kingsAndQueensQuestions = [
-  q(
-    "kq-001",
-    "old",
-    "easy",
-    "Who was the first king of Israel?",
-    ["Saul", "David", "Solomon", "Samuel"],
-    0,
-    "1 Samuel 10:1, 24",
-    "Samuel anointed Saul, a Benjamite who stood taller than all the people, as Israel's first king.",
-    ["saul", "first king"],
-  ),
   q(
     "kq-002",
     "old",
@@ -24,17 +15,6 @@ export const kingsAndQueensQuestions = [
     "1 Kings 3:9-12",
     "Solomon asked for wisdom to judge God's people. God was pleased and gave him wisdom plus the riches and honor he had not asked for.",
     ["solomon", "wisdom"],
-  ),
-  q(
-    "kq-003",
-    "old",
-    "easy",
-    "Which former shepherd became Israel's greatest king and wrote many psalms?",
-    ["David", "Saul", "Rehoboam", "Jeroboam"],
-    0,
-    "2 Samuel 5:3-4",
-    "David, the shepherd boy anointed by Samuel, became king over all Israel and reigned forty years.",
-    ["david"],
   ),
   q(
     "kq-004",
@@ -48,17 +28,6 @@ export const kingsAndQueensQuestions = [
     ["esther", "haman"],
   ),
   q(
-    "kq-005",
-    "old",
-    "medium",
-    "Which queen traveled far to test Solomon with hard questions?",
-    ["The queen of Sheba", "Queen Esther", "Queen Vashti", "Queen Jezebel"],
-    0,
-    "1 Kings 10:1-7",
-    "The queen of Sheba came to Jerusalem, heard Solomon's wisdom, and confessed that the half had not been told her.",
-    ["sheba", "solomon"],
-  ),
-  q(
     "kq-006",
     "old",
     "medium",
@@ -68,17 +37,6 @@ export const kingsAndQueensQuestions = [
     "1 Kings 16:30-31; 19:1-2",
     "Jezebel promoted Baal worship in Israel and threatened Elijah's life after the showdown on Mount Carmel.",
     ["jezebel", "ahab"],
-  ),
-  q(
-    "kq-007",
-    "old",
-    "medium",
-    "Which Babylonian king dreamed of a great image and later ate grass like an ox?",
-    ["Nebuchadnezzar", "Belshazzar", "Darius", "Cyrus"],
-    0,
-    "Daniel 2:1; 4:33",
-    "Nebuchadnezzar's pride was humbled: he lived like a beast until he lifted his eyes to heaven and honored the Most High.",
-    ["nebuchadnezzar", "babylon"],
   ),
   q(
     "kq-008",
@@ -92,17 +50,6 @@ export const kingsAndQueensQuestions = [
     ["josiah", "reform"],
   ),
   q(
-    "kq-009",
-    "old",
-    "hard",
-    "Which king of Judah was granted fifteen more years of life after he prayed while deathly ill?",
-    ["Hezekiah", "Uzziah", "Jehoshaphat", "Amaziah"],
-    0,
-    "2 Kings 20:1-6",
-    "Hezekiah wept and prayed, and God sent Isaiah to say He had heard: fifteen years were added to his life and the city was defended.",
-    ["hezekiah", "healing"],
-  ),
-  q(
     "kq-010",
     "old",
     "hard",
@@ -112,17 +59,6 @@ export const kingsAndQueensQuestions = [
     "Ezra 1:1-3",
     "In his first year, Cyrus king of Persia proclaimed that God had charged him to build Him a house at Jerusalem, freeing the exiles to return.",
     ["cyrus", "return", "temple"],
-  ),
-  q(
-    "kq-011",
-    "old",
-    "easy",
-    "Which king's heart was turned from the LORD in his old age by his many foreign wives?",
-    ["Solomon", "David", "Rehoboam", "Ahab"],
-    0,
-    "1 Kings 11:4",
-    "Solomon's foreign wives turned his heart after other gods when he was old, and the kingdom was later torn from his son.",
-    ["solomon", "idolatry"],
   ),
   q(
     "kq-012",
@@ -136,17 +72,6 @@ export const kingsAndQueensQuestions = [
     ["uzziah", "pride", "leprosy"],
   ),
   q(
-    "kq-013",
-    "old",
-    "medium",
-    "Which son of Solomon caused the kingdom to split by threatening the people with heavier burdens?",
-    ["Rehoboam", "Jeroboam", "Abijah", "Asa"],
-    0,
-    "1 Kings 12:13-16",
-    "Rehoboam rejected the elders' advice and answered the people roughly, so ten tribes broke away to form the northern kingdom.",
-    ["rehoboam", "divided kingdom"],
-  ),
-  q(
     "kq-014",
     "old",
     "medium",
@@ -156,17 +81,6 @@ export const kingsAndQueensQuestions = [
     "Daniel 5:5",
     "As Belshazzar feasted with the temple vessels, fingers of a hand wrote on the wall, and Daniel declared his kingdom finished.",
     ["belshazzar", "babylon", "judgment"],
-  ),
-  q(
-    "kq-015",
-    "old",
-    "easy",
-    "Which king danced before the LORD with all his might as the ark was brought into Jerusalem?",
-    ["David", "Solomon", "Saul", "Josiah"],
-    0,
-    "2 Samuel 6:14",
-    "David danced before the LORD with all his might, wearing a linen ephod, as the ark of God came up into the city.",
-    ["david", "ark", "worship"],
   ),
   q(
     "kq-016",
@@ -180,17 +94,6 @@ export const kingsAndQueensQuestions = [
     ["ahab", "baal", "idolatry"],
   ),
   q(
-    "kq-017",
-    "old",
-    "hard",
-    "Which king was rejected by God for sparing King Agag after being told to destroy the Amalekites?",
-    ["Saul", "David", "Jonathan", "Abner"],
-    0,
-    "1 Samuel 15:9-23",
-    "Saul spared Agag and the best of the spoil, so Samuel told him that to obey is better than sacrifice, and God rejected him as king.",
-    ["saul", "amalekites", "disobedience"],
-  ),
-  q(
     "kq-018",
     "old",
     "hard",
@@ -200,17 +103,6 @@ export const kingsAndQueensQuestions = [
     "2 Kings 11:1",
     "When Athaliah saw her son was dead, she destroyed the royal seed to reign herself, but the infant Joash was hidden and later crowned.",
     ["athaliah", "judah"],
-  ),
-  q(
-    "kq-019",
-    "old",
-    "medium",
-    "Which furious commander became king of Israel and destroyed the house of Ahab?",
-    ["Jehu", "Omri", "Naboth", "Hazael"],
-    0,
-    "2 Kings 9:20-24",
-    "Jehu drove his chariot furiously and was anointed to cut off the house of Ahab, ending Baal worship in Israel.",
-    ["jehu", "ahab"],
   ),
   q(
     "kq-020",

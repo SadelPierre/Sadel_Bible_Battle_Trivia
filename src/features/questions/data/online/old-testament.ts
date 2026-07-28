@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("old-testament");
 
 export const oldTestamentQuestions = [
-  q(
-    "ot-001",
-    "old",
-    "easy",
-    "Who built an ark to save his family and the animals from the great flood?",
-    ["Noah", "Abraham", "Moses", "Joseph"],
-    0,
-    "Genesis 6:13-22",
-    "God told Noah to build an ark of gopher wood because a flood was coming. Noah obeyed, and his family and the animals were kept safe.",
-    ["noah", "flood", "ark"],
-  ),
   q(
     "ot-002",
     "old",
@@ -27,17 +18,6 @@ export const oldTestamentQuestions = [
     "And God said, Let there be light: and there was light.",
   ),
   q(
-    "ot-003",
-    "old",
-    "easy",
-    "Which prophet was swallowed by a great fish after running from God?",
-    ["Jonah", "Elijah", "Daniel", "Amos"],
-    0,
-    "Jonah 1:17",
-    "Jonah fled from God's call to preach in Nineveh. God prepared a great fish that swallowed him, and Jonah was inside it three days and three nights.",
-    ["jonah", "fish", "nineveh"],
-  ),
-  q(
     "ot-004",
     "old",
     "easy",
@@ -47,17 +27,6 @@ export const oldTestamentQuestions = [
     "Exodus 3:10",
     "God spoke to Moses from the burning bush and sent him to Pharaoh to bring the children of Israel out of Egypt.",
     ["moses", "exodus", "egypt"],
-  ),
-  q(
-    "ot-005",
-    "old",
-    "medium",
-    "How many plagues did God send upon Egypt?",
-    ["Ten", "Seven", "Twelve", "Five"],
-    0,
-    "Exodus 7-12",
-    "God sent ten plagues on Egypt, ending with the death of the firstborn, after which Pharaoh finally let Israel go.",
-    ["plagues", "egypt"],
   ),
   q(
     "ot-006",
@@ -71,17 +40,6 @@ export const oldTestamentQuestions = [
     ["manna", "wilderness"],
   ),
   q(
-    "ot-007",
-    "old",
-    "medium",
-    "On which mountain did Moses receive the Ten Commandments?",
-    ["Mount Sinai", "Mount Ararat", "Mount Carmel", "Mount Nebo"],
-    0,
-    "Exodus 19:20; 31:18",
-    "The LORD came down upon Mount Sinai and gave Moses two tables of stone written with the finger of God.",
-    ["sinai", "commandments"],
-  ),
-  q(
     "ot-008",
     "old",
     "medium",
@@ -91,17 +49,6 @@ export const oldTestamentQuestions = [
     "Genesis 32:28",
     "After wrestling until daybreak, Jacob was told, \"Thy name shall be called no more Jacob, but Israel: for as a prince hast thou power with God and with men.\"",
     ["jacob", "israel"],
-  ),
-  q(
-    "ot-009",
-    "old",
-    "hard",
-    "How many years did Israel wander in the wilderness before entering the Promised Land?",
-    ["Forty", "Twenty", "Seventy", "Twelve"],
-    0,
-    "Numbers 14:33-34",
-    "Because the people refused to trust God at Kadesh, that generation wandered forty years — one year for each day the spies searched the land.",
-    ["wilderness", "forty years"],
   ),
   q(
     "ot-010",
@@ -120,17 +67,6 @@ export const oldTestamentQuestions = [
     ["spies", "canaan", "faith"],
   ),
   q(
-    "ot-011",
-    "old",
-    "easy",
-    "Who was the brother that Cain killed in the field out of jealousy?",
-    ["Abel", "Seth", "Enoch", "Lamech"],
-    0,
-    "Genesis 4:8",
-    "Cain was angry that God accepted Abel's offering and not his own. He rose up against his brother Abel and killed him in the field.",
-    ["cain", "abel"],
-  ),
-  q(
     "ot-012",
     "old",
     "easy",
@@ -140,17 +76,6 @@ export const oldTestamentQuestions = [
     "Exodus 3:2-4",
     "The angel of the LORD appeared to Moses in a flame of fire out of the midst of a bush. The bush burned yet was not consumed, and God called to him from it.",
     ["moses", "burning bush", "horeb"],
-  ),
-  q(
-    "ot-013",
-    "old",
-    "easy",
-    "How many sons did Jacob have, who became the heads of the tribes of Israel?",
-    ["Twelve", "Ten", "Seven", "Two"],
-    0,
-    "Genesis 35:22-26",
-    "Jacob (renamed Israel) had twelve sons. Their descendants became the twelve tribes of Israel.",
-    ["jacob", "twelve tribes"],
   ),
   q(
     "ot-014",
@@ -164,17 +89,6 @@ export const oldTestamentQuestions = [
     ["creation", "six days"],
   ),
   q(
-    "ot-015",
-    "old",
-    "medium",
-    "What did Lot's wife become when she looked back at the burning city?",
-    ["A pillar of salt", "A pillar of stone", "A withered tree", "A heap of ashes"],
-    0,
-    "Genesis 19:26",
-    "As God destroyed Sodom, the angels warned Lot's family not to look back. Lot's wife looked back and became a pillar of salt.",
-    ["lot", "sodom", "salt"],
-  ),
-  q(
     "ot-016",
     "old",
     "medium",
@@ -186,17 +100,6 @@ export const oldTestamentQuestions = [
     ["adam", "eve", "eden"],
   ),
   q(
-    "ot-017",
-    "old",
-    "medium",
-    "Who led Israel across the Jordan River into the Promised Land after Moses died?",
-    ["Joshua", "Caleb", "Aaron", "Gideon"],
-    0,
-    "Joshua 3:14-17",
-    "The LORD stopped the waters of the Jordan, and under Joshua's leadership Israel crossed over on dry ground into Canaan.",
-    ["joshua", "jordan", "canaan"],
-  ),
-  q(
     "ot-018",
     "old",
     "medium",
@@ -206,17 +109,6 @@ export const oldTestamentQuestions = [
     "Judges 7:16-22",
     "God pared Gideon's army down to three hundred so Israel could not boast. They blew trumpets, broke pitchers hiding torches, and the LORD routed Midian.",
     ["gideon", "midian", "judges"],
-  ),
-  q(
-    "ot-019",
-    "old",
-    "hard",
-    "As a sign to King Hezekiah, what did God cause to go backward ten degrees?",
-    ["The shadow on the sundial", "The river Jordan", "The morning star", "The temple veil"],
-    0,
-    "2 Kings 20:9-11",
-    "To confirm His promise to heal Hezekiah, God brought the shadow ten degrees backward on the sundial of Ahaz.",
-    ["hezekiah", "sign", "sundial"],
   ),
   q(
     "ot-020",

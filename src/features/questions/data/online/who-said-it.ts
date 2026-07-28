@@ -1,19 +1,10 @@
-import { makeQuestionFactory } from "./helpers";
+// ONLINE pool — server-only. Never import this from client code: the answer
+// key must not reach a browser, or online play has no integrity.
+import { makeQuestionFactory } from "../helpers";
 
 const q = makeQuestionFactory("who-said-it");
 
 export const whoSaidItQuestions = [
-  q(
-    "ws-001",
-    "old",
-    "easy",
-    'Who asked God, "Am I my brother\'s keeper?"',
-    ["Cain", "Abel", "Esau", "Lamech"],
-    0,
-    "Genesis 4:9",
-    "After Cain killed his brother Abel, the LORD asked where Abel was, and Cain answered with this evasive question.",
-    ["cain", "abel"],
-  ),
   q(
     "ws-002",
     "old",
@@ -24,18 +15,6 @@ export const whoSaidItQuestions = [
     "Exodus 5:1",
     "Moses (with Aaron as his spokesman) delivered the LORD's command to Pharaoh: \"Let my people go, that they may hold a feast unto me in the wilderness.\"",
     ["moses", "pharaoh", "exodus"],
-  ),
-  q(
-    "ws-003",
-    "new",
-    "easy",
-    'Who said, "I am the way, the truth, and the life"?',
-    ["Jesus", "John the Baptist", "Paul", "Peter"],
-    0,
-    "John 14:6",
-    "Jesus said this to Thomas, adding, \"no man cometh unto the Father, but by me.\"",
-    ["jesus", "upper room"],
-    "Jesus saith unto him, I am the way, the truth, and the life.",
   ),
   q(
     "ws-004",
@@ -49,17 +28,6 @@ export const whoSaidItQuestions = [
     ["david", "psalm 23"],
   ),
   q(
-    "ws-005",
-    "old",
-    "medium",
-    'Who declared, "As for me and my house, we will serve the LORD"?',
-    ["Joshua", "Caleb", "Gideon", "Samuel"],
-    0,
-    "Joshua 24:15",
-    "Near the end of his life, Joshua challenged Israel to choose whom they would serve, and set this example for his own household.",
-    ["joshua", "covenant"],
-  ),
-  q(
     "ws-006",
     "old",
     "medium",
@@ -69,17 +37,6 @@ export const whoSaidItQuestions = [
     "Ruth 1:16",
     "Ruth spoke these words of loyalty to her mother-in-law Naomi, adding, \"thy people shall be my people, and thy God my God.\"",
     ["ruth", "naomi", "loyalty"],
-  ),
-  q(
-    "ws-007",
-    "new",
-    "medium",
-    'Who exclaimed, "My Lord and my God," upon seeing the risen Jesus?',
-    ["Thomas", "Peter", "Mary Magdalene", "John"],
-    0,
-    "John 20:28",
-    "When Jesus invited Thomas to touch His wounds, Thomas's doubt turned to worship with this confession.",
-    ["thomas", "resurrection"],
   ),
   q(
     "ws-008",
@@ -93,17 +50,6 @@ export const whoSaidItQuestions = [
     ["peter", "healing", "temple gate"],
   ),
   q(
-    "ws-009",
-    "old",
-    "hard",
-    'Who answered God\'s call with the words, "Here am I; send me"?',
-    ["Isaiah", "Jeremiah", "Ezekiel", "Jonah"],
-    0,
-    "Isaiah 6:8",
-    "After a seraph touched his lips with a live coal, Isaiah heard the LORD ask, \"Whom shall I send?\" and volunteered at once.",
-    ["isaiah", "call", "vision"],
-  ),
-  q(
     "ws-010",
     "new",
     "medium",
@@ -113,17 +59,6 @@ export const whoSaidItQuestions = [
     "Luke 23:42-43",
     "One of the criminals crucified beside Jesus asked this in faith, and Jesus promised, \"To day shalt thou be with me in paradise.\"",
     ["thief", "cross", "paradise"],
-  ),
-  q(
-    "ws-011",
-    "old",
-    "easy",
-    'Who spoke the words, "Let there be light"?',
-    ["God", "Moses", "Adam", "Jesus"],
-    0,
-    "Genesis 1:3",
-    "On the first day of creation God spoke light into existence, and He saw that the light was good.",
-    ["god", "creation"],
   ),
   q(
     "ws-012",
@@ -137,17 +72,6 @@ export const whoSaidItQuestions = [
     ["angel", "nativity", "shepherds"],
   ),
   q(
-    "ws-013",
-    "old",
-    "medium",
-    'Who answered God in the night, "Speak, LORD; for thy servant heareth"?',
-    ["Samuel", "Eli", "David", "Solomon"],
-    0,
-    "1 Samuel 3:9-10",
-    "Guided by Eli, the boy Samuel answered God's call with these words, and the LORD began to speak to him.",
-    ["samuel", "calling"],
-  ),
-  q(
     "ws-014",
     "new",
     "medium",
@@ -157,17 +81,6 @@ export const whoSaidItQuestions = [
     "Matthew 16:16",
     "When Jesus asked who they said He was, Peter made this great confession, which Jesus said was revealed by the Father.",
     ["peter", "confession"],
-  ),
-  q(
-    "ws-015",
-    "new",
-    "medium",
-    'Who replied to the angel Gabriel, "Be it unto me according to thy word"?',
-    ["Mary", "Elisabeth", "Anna", "Martha"],
-    0,
-    "Luke 1:38",
-    "When Gabriel told Mary she would bear the Son of God, she humbly submitted to God's will with these words.",
-    ["mary", "gabriel", "submission"],
   ),
   q(
     "ws-016",
@@ -181,17 +94,6 @@ export const whoSaidItQuestions = [
     ["jesus", "cross"],
   ),
   q(
-    "ws-017",
-    "old",
-    "hard",
-    'Who declared in his suffering, "I know that my redeemer liveth"?',
-    ["Job", "David", "Isaiah", "Moses"],
-    0,
-    "Job 19:25",
-    "In the midst of great affliction, Job expressed hope in a living Redeemer and the promise of seeing God.",
-    ["job", "redeemer", "hope"],
-  ),
-  q(
     "ws-018",
     "old",
     "hard",
@@ -201,17 +103,6 @@ export const whoSaidItQuestions = [
     "Psalm 51:10",
     "David prayed this after his sin, pleading for God to renew a right spirit within him and restore the joy of salvation.",
     ["david", "repentance", "psalm 51"],
-  ),
-  q(
-    "ws-019",
-    "new",
-    "medium",
-    'Who wrote near the end of his life, "I have fought a good fight... I have kept the faith"?',
-    ["Paul", "Peter", "John", "Stephen"],
-    0,
-    "2 Timothy 4:7",
-    "Paul wrote to Timothy as his death drew near, confident of the crown of righteousness laid up for him.",
-    ["paul", "faithfulness"],
   ),
   q(
     "ws-020",

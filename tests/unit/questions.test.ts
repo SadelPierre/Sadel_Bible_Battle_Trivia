@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { QUESTION_BANK } from "@/features/questions/bank";
+import { ONLINE_QUESTION_BANK, QUESTION_BANK } from "@/features/questions/bank";
+import { OFFLINE_QUESTION_BANK } from "@/features/questions/offline-bank";
 import { validateBank } from "@/features/questions/validate";
 import { selectQuestions, withShuffledOptions } from "@/features/questions/select";
 import { ALL_CATEGORIES, DEFAULT_SETTINGS } from "@/types/game";
@@ -33,6 +34,39 @@ describe("seed question bank", () => {
       expect(q.bibleReference.length, q.id).toBeGreaterThan(3);
       expect(q.explanation.length, q.id).toBeGreaterThan(10);
     }
+  });
+});
+
+describe("offline / online pool split", () => {
+  it("shares no question between the pools", () => {
+    const offlineIds = new Set(OFFLINE_QUESTION_BANK.map((q) => q.id));
+    const overlap = ONLINE_QUESTION_BANK.filter((q) => offlineIds.has(q.id)).map((q) => q.id);
+    expect(overlap, "online questions leaked into the client bundle").toEqual([]);
+  });
+
+  it("accounts for every question exactly once", () => {
+    expect(OFFLINE_QUESTION_BANK.length + ONLINE_QUESTION_BANK.length).toBe(QUESTION_BANK.length);
+  });
+
+  it("gives each pool full category and difficulty coverage", () => {
+    for (const [name, bank] of [
+      ["offline", OFFLINE_QUESTION_BANK],
+      ["online", ONLINE_QUESTION_BANK],
+    ] as const) {
+      for (const cat of ALL_CATEGORIES) {
+        const count = bank.filter((q) => q.category === cat).length;
+        expect(count, `${name} bank, category ${cat}`).toBeGreaterThanOrEqual(8);
+      }
+      for (const d of ["easy", "medium", "hard"] as const) {
+        expect(bank.some((q) => q.difficulty === d), `${name} bank, difficulty ${d}`).toBe(true);
+      }
+    }
+  });
+
+  it("leaves each pool big enough for the longest match", () => {
+    // A 30-player tournament needs a question per field cut plus a full duel.
+    expect(ONLINE_QUESTION_BANK.length).toBeGreaterThanOrEqual(60);
+    expect(OFFLINE_QUESTION_BANK.length).toBeGreaterThanOrEqual(60);
   });
 });
 

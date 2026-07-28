@@ -9,7 +9,7 @@
 | Agent | Where it lives |
 | --- | --- |
 | Architecture | this document; `src/features/*` boundaries |
-| Bible Content | `src/features/questions/data/*` + `validate.ts` (Zod schema, duplicate/similarity detection) |
+| Bible Content | `src/features/questions/data/{offline,online}/*` + `validate.ts` (Zod schema, duplicate/similarity detection) |
 | Gameplay | `src/features/game-engine/engine.ts` (pure state machine) + `src/features/scoring/scoring.ts` |
 | Computer Player | `src/features/computer-players/bots.ts` |
 | Multiplayer | `src/features/online/server.ts` (authoritative), `client.ts`, `src/hooks/useOnlineRoom.ts` |
@@ -53,10 +53,12 @@ Browser ──POST /api/rooms/[code]/answer──▶ Next.js route (service role
 
 - **Settle-on-request:** serverless functions can't run timers, so every request first advances any due transitions (countdown finished, due bot answers, timer expiry, reveal auto-advance). Clients poll every 2 s during play (4 s in lobby) with realtime nudges for instant feel, so transitions land within ~1 s of schedule.
 - **Sanitization:** while a question is live, the snapshot strips `correctAnswerIndex`, `explanation`, `bibleReference`, and `scriptureExcerpt`, and exposes only *who* answered — never what they chose. Reveal-phase snapshots include everything.
+- **Disjoint question pools:** sanitization only means something if the client has no other copy of the answer. Solo and Local grade on-device, so their pool ships to the browser; online matches therefore draw from a separate `server-only` pool that shares no question with it. See QUESTION_FORMAT.md.
 - **Concurrency:** `game_rooms.version` is an optimistic lock. The `commit_room_state` database function checks and bumps it in the same transaction that writes game state, answer audits, host flags, and the sync event. Losers reload and retry (max 4 attempts); duplicate answers/advances are also reducer no-ops.
 - **Bots online:** when a question starts the server rolls each bot's plan (answer + timestamp); plans apply once authoritative time passes them, so all clients see bots answer at the same moment.
 - **Clocks:** snapshots carry `serverNow`; clients render countdowns as `serverDeadline − measuredOffset`. The server accepts answers up to 750 ms past the deadline to absorb latency.
-- **Identity:** guests get a localStorage session id; joining a room issues a per-room `token` (returned once, stored client-side). Every API call proves `playerId + token`. Reconnection = rejoining with the same session id.
+- **Identity:** guests get a localStorage session id; joining a room issues a per-room `token` (returned once, stored client-side). Every API call proves `playerId + token` — in a POST body, or an `Authorization: Bearer <playerId>.<token>` header for the snapshot GET. Never in the URL, since query strings survive in proxy logs and error trackers. Reconnection = rejoining with the same session id.
+- **Room creation:** one transactional RPC (`create_room_with_host`) creates the room, seats the host, and sets the host pointer together, keyed by a client-supplied operation id so a retry returns the original room instead of a second one.
 - **Host migration:** if the host's heartbeat is >45 s stale, the longest-connected human inherits the crown; a room with no humans becomes `abandoned`. Rooms expire after 24 h.
 
 ## Tournament mode
@@ -65,6 +67,7 @@ A 30-player survival knockout built as a **thin layer on top of the same engine*
 
 - **Engine** (`src/features/tournament/tournament.ts`): the reducer delegates here whenever `GameState.tournament` is present. After each reveal the surviving pack is ranked by cumulative score and cut to a **survivor schedule** (`buildSurvivorSchedule`: 30→18→11→7→5→3→2), deterministic down to a stable player-id tiebreak so the field always converges to two finalists. The last two play a sudden-death **duel** (`DUEL_WINS_TO_WIN` outright question-wins). Eliminated players are rejected by `SUBMIT_ANSWER` and skipped by `allAnswered`, so the round never waits on them.
 - **The answer inbox** (the one scaling change): the standard online path routes every answer through the room's optimistic-version lock, which is fine for 4 players but melts down when 30 people answer inside the same 2-second window. Tournament answers instead write to `tournament_answers` — one row per `(game, question, player)`, distinct primary keys, **zero contention on `game_rooms.version`** — via `submit_tournament_answer` (idempotent, first answer wins, emits a Realtime nudge). The authoritative settle pass drains the inbox (`drain_tournament_answers`) and folds all pending answers into engine state in a **single batched commit** at reveal. The write path never bumps the version; the fold path bumps it once per batch.
+- **Closing a question atomically:** collecting the answers and committing the reveal cannot be two steps — an answer landing between them is accepted by the API and then never scored, which reads to the player as "I answered and got zero", or as an unjust elimination. `close_tournament_question` takes an exclusive lock on the game row (waiting out in-flight submissions), marks the question closed, and returns the final set in one transaction; submissions take a *share* lock, so players still never contend with each other, only with the close.
 - **Lobby & start:** tournaments seat up to 30 (`game_rooms.max_players` relaxed to 30, `game_mode = 'tournament'`) and start on a **minimum headcount** rather than an all-Ready gate.
 - **UI:** `TournamentLobby`, `TournamentGameView` (field + duel + spectator), `TournamentStandings`, `DuelPanel`, and `ChampionResult` — the room page branches on `snapshot.gameMode`. Everything else (reconnection, host migration, bots, sanitization, realtime nudges) is inherited unchanged.
 
@@ -85,7 +88,8 @@ src/
                         rateLimit, supabase/{admin,browser}
   stores/               preferences (persisted), offlineGame
   types/                game.ts (single source of truth for shared types)
-supabase/migrations/    0001_init.sql (schema + RLS + realtime)
+supabase/migrations/    replayable chain: schema + RLS + realtime, tournament,
+                        hardening (grants, atomic close, retention)
 scripts/                questions-admin.ts, seed-questions.ts
 tests/                  unit/ component/ e2e/ stubs/
 ```

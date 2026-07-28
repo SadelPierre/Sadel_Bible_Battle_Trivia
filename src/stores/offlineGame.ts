@@ -20,7 +20,7 @@ import {
 } from "@/features/game-engine/engine";
 import { planBotAnswer } from "@/features/computer-players/bots";
 import { selectQuestions } from "@/features/questions/select";
-import { QUESTION_BANK } from "@/features/questions/bank";
+import { OFFLINE_QUESTION_BANK } from "@/features/questions/offline-bank";
 import { audio } from "@/features/audio/audio";
 
 export type LocalStyle = "shared" | "pass";
@@ -169,7 +169,7 @@ export const useOfflineGame = create<OfflineGameStore>((set, get) => {
 
   function beginMatch(config: OfflineConfig, excludeIds: Set<string>) {
     clearTimers();
-    const questions = selectQuestions(QUESTION_BANK, config.settings, excludeIds);
+    const questions = selectQuestions(OFFLINE_QUESTION_BANK, config.settings, excludeIds);
     const game = createGame(config.settings, config.players, questions, Date.now());
     set({ config, game, passTurn: null });
     audio.play("gameStart");
