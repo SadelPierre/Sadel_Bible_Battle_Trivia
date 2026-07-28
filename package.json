@@ -14,8 +14,8 @@
     "test:e2e": "playwright test",
     "format": "prettier --write .",
     "questions:validate": "vitest run tests/unit/questions.test.ts",
-    "questions:admin": "tsx scripts/questions-admin.ts",
-    "db:seed": "tsx scripts/seed-questions.ts"
+    "questions:admin": "tsx --tsconfig tsconfig.scripts.json scripts/questions-admin.ts",
+    "db:seed": "tsx --tsconfig tsconfig.scripts.json scripts/seed-questions.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.110.7",

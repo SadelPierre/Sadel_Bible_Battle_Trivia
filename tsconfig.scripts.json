@@ -1,0 +1,16 @@
+{
+  // Local CLI tooling (question admin, database seed) runs under tsx, outside
+  // Next.js. Those scripts legitimately need the full bank, but importing it
+  // pulls in `server-only`, whose default entry point throws by design.
+  //
+  // Mapping it to the same no-op stub the tests use keeps the build-time guard
+  // exactly where it matters — a client component importing the online pool is
+  // still a build error — while letting node-side tooling run.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@/*": ["./src/*"],
+      "server-only": ["./tests/stubs/server-only.ts"]
+    }
+  }
+}
