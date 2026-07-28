@@ -69,6 +69,15 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install exact dependencies
+        run: npm ci
+
       - name: Install psql
         run: sudo apt-get update && sudo apt-get install --no-install-recommends -y postgresql-client
 
@@ -111,6 +120,13 @@ jobs:
           "
           psql -v ON_ERROR_STOP=1 -c "select public.cleanup_expired_rooms();"
           psql -v ON_ERROR_STOP=1 -c "select public.rate_limit_hit('ci', 1, 60);"
+
+      - name: Tournament concurrency tests
+        # Proves the locking, not just that the functions exist: an answer the
+        # API accepted must never be dropped by the reveal that follows it.
+        run: npm run test:integration
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
 
   browser:
     needs: validate
