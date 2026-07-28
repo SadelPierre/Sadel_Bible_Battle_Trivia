@@ -34,16 +34,17 @@ Content rules enforced by review + validation:
 
 ## Where questions live
 
-The bank ships **300 reviewed questions** (20 per category × 15 categories), split
-into two pools that never overlap:
+The bank holds **450 reviewed questions** across 15 categories, split into two
+pools that never overlap:
 
-| Pool | Files | Aggregator | Used by |
-| --- | --- | --- | --- |
-| Offline | `src/features/questions/data/offline/<category>.ts` | `offline-bank.ts` → `OFFLINE_QUESTION_BANK` | Solo, Local |
-| Online | `src/features/questions/data/online/<category>.ts` | `bank.ts` → `ONLINE_QUESTION_BANK` (`server-only`) | online rooms, tournaments |
+| Pool | Files | Aggregator | Size | Used by |
+| --- | --- | --- | --- | --- |
+| Offline | `src/features/questions/data/offline/<category>.ts` | `offline-bank.ts` → `OFFLINE_QUESTION_BANK` | 300 (20 per category) | Solo, Local |
+| Online | `src/features/questions/data/online/<category>.ts` | `bank.ts` → `ONLINE_QUESTION_BANK` (`server-only`) | 150 (10 per category) | online rooms, tournaments |
 
-Each pool holds 10 questions per category, so both cover every category and
-difficulty.
+Both pools cover every category and every difficulty. The offline pool is the
+larger of the two because it carries the questions that have already been
+published to browsers — see "Rotating the online pool" below.
 
 **Why the split.** Solo and Local grade answers on the device — they have to keep
 working with no network — so their questions reach the browser complete with
@@ -57,12 +58,28 @@ one array at runtime: filtering would still ship every question. `bank.ts` also
 imports `server-only`, so a client importing the online pool is a build error
 rather than a silent leak. `QUESTION_BANK` (both pools) exists for validation,
 admin tooling and seeding only — never for choosing a live match's questions.
-A unit test asserts the pools stay disjoint.
+Unit tests assert that the pools share no id **and no question text**.
+
+## Rotating the online pool
+
+Splitting the bank stops future exposure; it cannot un-publish what a browser
+already downloaded. Every question that was live before the split had shipped to
+every visitor, so the first online pool was burned the moment it was created.
+
+The fix is a rotation, and it is the reason the pools are uneven:
+
+1. Move the exposed questions into `data/offline/`. They are still good
+   questions, and the offline pool is public by design, so nothing is wasted.
+2. Author replacements in `data/online/` that have never been in a bundle.
+
+If the online pool is ever exposed again — an accidental client import, a
+debug endpoint, a leaked build — rotate it the same way. Treat any online
+question that has reached a browser as spent, whatever the route.
 
 ## Admin workflow (protected — local CLI, never exposed in the app)
 
 ```bash
-npm run questions:admin -- validate          # all rules + duplicate-id + similarity detection
+npm run questions:admin -- validate          # all rules + duplicate-id + similarity detection (both pools)
 npm run questions:admin -- list [category]   # list (flags UNREVIEWED)
 npm run questions:admin -- preview ot-001    # see a question exactly as players will
 npm run questions:admin -- stats             # category/difficulty distribution

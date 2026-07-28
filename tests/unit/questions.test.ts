@@ -68,6 +68,19 @@ describe("offline / online pool split", () => {
     expect(ONLINE_QUESTION_BANK.length).toBeGreaterThanOrEqual(60);
     expect(OFFLINE_QUESTION_BANK.length).toBeGreaterThanOrEqual(60);
   });
+
+  it("keeps every online question out of the questions the browser receives", () => {
+    // The offline pool ships to the browser answer key and all. Any overlap of
+    // question TEXT — not just id — would hand an online match away, since a
+    // scraper matches on the wording it can see in the snapshot.
+    const offlineText = new Set(
+      OFFLINE_QUESTION_BANK.map((q) => q.question.trim().toLowerCase()),
+    );
+    const leaked = ONLINE_QUESTION_BANK.filter((q) =>
+      offlineText.has(q.question.trim().toLowerCase()),
+    ).map((q) => q.id);
+    expect(leaked, "online question text also present in the client bundle").toEqual([]);
+  });
 });
 
 describe("question selection", () => {
