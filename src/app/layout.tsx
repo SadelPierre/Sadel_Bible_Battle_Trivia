@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { BRAND } from "@/lib/branding";
 import { DEFAULT_THEME } from "@/lib/themes";
-import { ReducedMotionSync } from "@/components/shared/ReducedMotionSync";
+import { MotionProvider } from "@/components/shared/MotionProvider";
 import { PwaProvider } from "@/components/pwa/PwaProvider";
 import { InstallBanner } from "@/components/pwa/InstallBanner";
 
@@ -30,9 +30,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" data-theme={DEFAULT_THEME}>
       <body className="antialiased">
         <PwaProvider />
-        <ReducedMotionSync />
-        {children}
-        <InstallBanner />
+        <MotionProvider>
+          {children}
+          <InstallBanner />
+        </MotionProvider>
       </body>
     </html>
   );

@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { RoomSnapshot } from "@/features/online/types";
 import { roomActions, type RoomCredentials } from "@/features/online/client";
 import { AVATAR_EMOJI, MIN_TOURNAMENT_PLAYERS, type GameSettings } from "@/types/game";
 import { PLAYER_COLOR_STYLES } from "@/lib/playerColors";
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
+import { CopyLabel } from "@/components/shared/CopyLabel";
 import { GameSettingsForm } from "@/components/settings/GameSettingsForm";
 
 /** Lobby for a knockout tournament: scales to 30 seats and starts on headcount. */
@@ -26,6 +28,10 @@ export function TournamentLobby({
   const [actionError, setActionError] = useState<string | null>(null);
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [busy, setBusy] = useState(false);
+  const firstPaint = useRef(true);
+  useEffect(() => {
+    firstPaint.current = false;
+  }, []);
 
   const isHost = snapshot.hostPlayerId === snapshot.myPlayerId;
   const count = snapshot.players.length;
@@ -76,10 +82,10 @@ export function TournamentLobby({
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => copy("code", snapshot.code)}>
-            {copied === "code" ? "Copied ✓" : "📋 Copy code"}
+            <CopyLabel copied={copied === "code"} idle="📋 Copy code" />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => copy("link", inviteLink)}>
-            {copied === "link" ? "Copied ✓" : "🔗 Copy invite link"}
+            <CopyLabel copied={copied === "link"} idle="🔗 Copy invite link" />
           </Button>
         </div>
       </Card>
@@ -89,35 +95,45 @@ export function TournamentLobby({
           Competitors <span className="text-bbl-gold">({count}/{snapshot.maxPlayers})</span>
         </h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {snapshot.players.map((p, i) => {
-            const c = PLAYER_COLOR_STYLES[p.color];
-            return (
-              <motion.div
-                key={p.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: Math.min(i * 0.02, 0.4) }}
-                className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 ${c.bg} ${c.border}`}
-              >
-                <span aria-hidden>{AVATAR_EMOJI[p.avatar]}</span>
-                <span className={`min-w-0 flex-1 truncate text-sm font-semibold ${c.text}`}>
-                  {p.name}
-                  {p.id === snapshot.myPlayerId && <span className="text-bbl-muted"> (you)</span>}
-                </span>
-                {p.isHost && <span className="text-xs" aria-label="Host">👑</span>}
-                {p.isBot && <span className="text-xs text-bbl-muted" aria-label="bot">🤖</span>}
-                {isHost && p.id !== snapshot.myPlayerId && (
-                  <button
-                    className="text-xs text-bbl-muted hover:text-bbl-incorrect"
-                    aria-label={`Remove ${p.name}`}
-                    onClick={() => run(() => roomActions.removePlayer(snapshot.code, creds, p.id))}
-                  >
-                    ✕
-                  </button>
-                )}
-              </motion.div>
-            );
-          })}
+          <AnimatePresence mode="popLayout" initial={false}>
+            {snapshot.players.map((p, i) => {
+              const c = PLAYER_COLOR_STYLES[p.color];
+              return (
+                <motion.div
+                  layout
+                  key={p.id}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{
+                    duration: DUR.fast,
+                    ease: EASE_OUT,
+                    // First paint staggers across the field; a seat filled later
+                    // animates on its own with no queue in front of it.
+                    delay: firstPaint.current ? Math.min(i * 0.02, 0.4) : 0,
+                  }}
+                  className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 ${c.bg} ${c.border}`}
+                >
+                  <span aria-hidden>{AVATAR_EMOJI[p.avatar]}</span>
+                  <span className={`min-w-0 flex-1 truncate text-sm font-semibold ${c.text}`}>
+                    {p.name}
+                    {p.id === snapshot.myPlayerId && <span className="text-bbl-muted"> (you)</span>}
+                  </span>
+                  {p.isHost && <span className="text-xs" aria-label="Host">👑</span>}
+                  {p.isBot && <span className="text-xs text-bbl-muted" aria-label="bot">🤖</span>}
+                  {isHost && p.id !== snapshot.myPlayerId && (
+                    <button
+                      className="text-xs text-bbl-muted hover:text-bbl-incorrect"
+                      aria-label={`Remove ${p.name}`}
+                      onClick={() => run(() => roomActions.removePlayer(snapshot.code, creds, p.id))}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
 
         {isHost && count < snapshot.maxPlayers && (

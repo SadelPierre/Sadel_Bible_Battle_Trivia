@@ -7,7 +7,7 @@
  * sends answer/advance requests (answers go to the contention-free inbox).
  */
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import type { RoomSnapshot } from "@/features/online/types";
 import { roomActions, type RoomCredentials } from "@/features/online/client";
 import type { BibleQuestion, GamePlayer } from "@/types/game";
@@ -21,6 +21,7 @@ import { ChampionResult } from "@/components/results/ChampionResult";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
 import { audio } from "@/features/audio/audio";
+import { DUR, EASE_OUT } from "@/lib/motion";
 
 export function TournamentGameView({
   snapshot,
@@ -122,10 +123,24 @@ export function TournamentGameView({
       .catch(() => setPendingAnswer(null));
   };
 
-  const spectatorBanner = meEliminated && (
-    <Card className="border-bbl-incorrect/40 bg-bbl-incorrect/10 p-3 text-center text-sm font-semibold text-bbl-incorrect">
-      💀 You&apos;ve been eliminated — watching the rest as a spectator.
-    </Card>
+  // Getting knocked out is the sharpest moment in the mode. Growing the banner
+  // open bridges the shove it gives the rest of the column.
+  const spectatorBanner = (
+    <AnimatePresence initial={false}>
+      {meEliminated && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: DUR.panel, ease: EASE_OUT }}
+          className="overflow-hidden"
+        >
+          <Card className="border-bbl-incorrect/40 bg-bbl-incorrect/10 p-3 text-center text-sm font-semibold text-bbl-incorrect">
+            💀 You&apos;ve been eliminated — watching the rest as a spectator.
+          </Card>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 
   const hostContinue = revealed && (
