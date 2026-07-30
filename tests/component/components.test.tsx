@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { AnswerButton } from "@/components/game/AnswerButton";
 import { Scoreboard } from "@/components/game/Scoreboard";
 import { RevealPanel } from "@/components/game/RevealPanel";
@@ -210,13 +210,14 @@ describe("TournamentGameView spectator controls", () => {
   });
 
   it("keeps spectating by default and never leaves without confirmation", () => {
-    const onLeft = vi.fn();
+    const onLeaveMidGame = vi.fn(async () => {});
     render(
       <TournamentGameView
         snapshot={eliminatedSnapshot()}
         creds={creds}
         refresh={async () => {}}
-        onLeft={onLeft}
+        onLeft={vi.fn()}
+        onLeaveMidGame={onLeaveMidGame}
       />,
     );
     // still watching: the live question is on screen, no answer buttons
@@ -225,28 +226,64 @@ describe("TournamentGameView spectator controls", () => {
 
     // one click arms the confirm, it must not leave outright
     fireEvent.click(screen.getByRole("button", { name: /Leave tournament/i }));
-    expect(onLeft).not.toHaveBeenCalled();
+    expect(onLeaveMidGame).not.toHaveBeenCalled();
     expect(screen.getByText(/Leave for good\?/)).toBeInTheDocument();
   });
 
   it("leaves on confirm and backs out on 'Keep watching'", () => {
-    const onLeft = vi.fn();
+    const onLeaveMidGame = vi.fn(async () => {});
     render(
       <TournamentGameView
         snapshot={eliminatedSnapshot()}
         creds={creds}
         refresh={async () => {}}
-        onLeft={onLeft}
+        onLeft={vi.fn()}
+        onLeaveMidGame={onLeaveMidGame}
       />,
     );
     fireEvent.click(screen.getByRole("button", { name: /Leave tournament/i }));
     fireEvent.click(screen.getByRole("button", { name: /Keep watching/i }));
-    expect(onLeft).not.toHaveBeenCalled();
+    expect(onLeaveMidGame).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: /Leave tournament/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Leave tournament/i }));
     fireEvent.click(screen.getByRole("button", { name: /Yes, leave/i }));
-    expect(onLeft).toHaveBeenCalledTimes(1);
+    expect(onLeaveMidGame).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the player in the room and offers a retry when leaving fails", async () => {
+    // A rejected leave means the seat still exists server-side. The player has
+    // to stay put — silently navigating home would lock them out of a room
+    // they still occupy.
+    const onLeaveMidGame = vi.fn(async () => {
+      throw new Error("Network unreachable.");
+    });
+    render(
+      <TournamentGameView
+        snapshot={eliminatedSnapshot()}
+        creds={creds}
+        refresh={async () => {}}
+        onLeft={vi.fn()}
+        onLeaveMidGame={onLeaveMidGame}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Leave tournament/i }));
+    // the failure lands in a rejected promise, so let React flush it
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: /Yes, leave/i }));
+    });
+
+    const alert = screen.getByRole("alert");
+    expect(alert).toHaveTextContent(/still in the room/i);
+    expect(alert).toHaveTextContent(/Network unreachable/);
+
+    // and the confirm stays armed so a second press retries
+    const retry = screen.getByRole("button", { name: /Yes, leave/i });
+    expect(retry).toBeEnabled();
+    await act(async () => {
+      fireEvent.click(retry);
+    });
+    expect(onLeaveMidGame).toHaveBeenCalledTimes(2);
   });
 
   it("offers no leave control while you are still in the running", () => {
@@ -254,7 +291,13 @@ describe("TournamentGameView spectator controls", () => {
     snap.game!.tournament!.meEliminated = false;
     snap.game!.tournament!.eliminatedAtIndex = {};
     render(
-      <TournamentGameView snapshot={snap} creds={creds} refresh={async () => {}} onLeft={vi.fn()} />,
+      <TournamentGameView
+        snapshot={snap}
+        creds={creds}
+        refresh={async () => {}}
+        onLeft={vi.fn()}
+        onLeaveMidGame={vi.fn(async () => {})}
+      />,
     );
     expect(screen.queryByRole("button", { name: /Leave tournament/i })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Answer A/i })).toBeInTheDocument();

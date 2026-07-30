@@ -28,11 +28,15 @@ export function TournamentGameView({
   creds,
   refresh,
   onLeft,
+  onLeaveMidGame,
 }: {
   snapshot: RoomSnapshot;
   creds: RoomCredentials;
   refresh: () => Promise<void>;
+  /** Best-effort exit from the results screen — the game is over, so it never blocks. */
   onLeft: () => void;
+  /** Strict exit from a live match: resolves once the seat is really gone, rejects otherwise. */
+  onLeaveMidGame: () => Promise<void>;
 }) {
   const game = snapshot.game;
   const offsetRef = useRef(0);
@@ -46,6 +50,7 @@ export function TournamentGameView({
   // two-step, because it deletes your seat and can't be undone from here.
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [leaving, setLeaving] = useState(false);
+  const [leaveError, setLeaveError] = useState<string | null>(null);
   const lastPhase = useRef<string | null>(null);
   const wasEliminated = useRef(false);
 
@@ -155,12 +160,29 @@ export function TournamentGameView({
                     disabled={leaving}
                     onClick={() => {
                       setLeaving(true);
-                      onLeft();
+                      setLeaveError(null);
+                      // Only navigates once the server confirms the seat is
+                      // gone. On failure we keep the credentials and the
+                      // confirm open so the player can simply press again.
+                      void onLeaveMidGame().catch((err: unknown) => {
+                        setLeaving(false);
+                        setLeaveError(
+                          err instanceof Error ? err.message : "Couldn't leave the room.",
+                        );
+                      });
                     }}
                   >
-                    Yes, leave
+                    {leaving ? "Leaving…" : "Yes, leave"}
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => setConfirmLeave(false)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    disabled={leaving}
+                    onClick={() => {
+                      setConfirmLeave(false);
+                      setLeaveError(null);
+                    }}
+                  >
                     Keep watching
                   </Button>
                 </>
@@ -170,6 +192,11 @@ export function TournamentGameView({
                 </Button>
               )}
             </div>
+            {leaveError && (
+              <p className="mt-2 text-xs text-bbl-incorrect" role="alert">
+                Couldn&apos;t leave — you&apos;re still in the room. {leaveError}
+              </p>
+            )}
           </Card>
         </motion.div>
       )}
