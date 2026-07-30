@@ -31,11 +31,30 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
       return;
     }
     // Best effort: never trap someone on the results screen if the network is
-    // down, but tell the server immediately when it is reachable.
+    // down, but tell the server immediately when it is reachable. Safe here
+    // because the game is over — a seat left behind costs nobody anything.
     void roomActions
       .leave(code, credentials)
       .catch(() => undefined)
       .finally(clearAndGoHome);
+  };
+
+  /**
+   * Strict counterpart for walking out of a match still in progress.
+   *
+   * Dropping the credentials before the server has actually deleted the seat
+   * locks the player out of a room they still occupy: the stale row keeps
+   * their slot, and if they were host it keeps host authority too. So the seat
+   * has to be gone first. Rejects on failure so the caller can offer a retry
+   * instead of stranding them.
+   */
+  const leaveMidGame = async () => {
+    if (!credentials) {
+      clearAndGoHome();
+      return;
+    }
+    await roomActions.leave(code, credentials);
+    clearAndGoHome();
   };
 
   if (error) {
@@ -106,7 +125,13 @@ export default function RoomPage({ params }: { params: Promise<{ code: string }>
           );
         }
         return isTournament ? (
-          <TournamentGameView snapshot={snapshot} creds={credentials!} refresh={refresh} onLeft={leaveDuringGame} />
+          <TournamentGameView
+            snapshot={snapshot}
+            creds={credentials!}
+            refresh={refresh}
+            onLeft={leaveDuringGame}
+            onLeaveMidGame={leaveMidGame}
+          />
         ) : (
           <OnlineGameView snapshot={snapshot} creds={credentials!} refresh={refresh} onLeft={leaveDuringGame} />
         );
