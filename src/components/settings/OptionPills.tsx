@@ -26,7 +26,7 @@ export function OptionPills<T extends string | number>({
             type="button"
             role="radio"
             aria-checked={value === opt}
-            className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-colors cursor-pointer ${
+            className={`rounded-full border px-3.5 py-1.5 text-sm font-semibold transition-[color,background-color,border-color,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer ${
               value === opt
                 ? "border-bbl-gold bg-bbl-gold/20 text-bbl-gold"
                 : "border-bbl-border bg-bbl-card text-bbl-text hover:border-bbl-primary"

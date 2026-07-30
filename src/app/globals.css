@@ -19,6 +19,19 @@
   --bbl-incorrect: #f87171;
 }
 
+/* ── Motion vocabulary ─────────────────────────────────────────
+   Shared easing + durations. Not theme-scoped: motion feel stays
+   constant across themes. The JS equivalents live in src/lib/motion.ts
+   and must be kept in sync. */
+:root {
+  --bbl-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --bbl-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --bbl-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --bbl-dur-press: 150ms;
+  --bbl-dur-fast: 200ms;
+  --bbl-dur-panel: 400ms;
+}
+
 @theme inline {
   --color-bbl-bg: var(--bbl-bg);
   --color-bbl-bg-accent: var(--bbl-bg-accent);

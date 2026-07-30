@@ -78,7 +78,7 @@ export function GameSettingsForm({
                 key={cat}
                 type="button"
                 aria-pressed={active}
-                className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors cursor-pointer ${
+                className={`rounded-full border px-3 py-1 text-xs font-semibold transition-[color,background-color,border-color,transform] duration-150 ease-out active:scale-[0.97] cursor-pointer ${
                   active
                     ? "border-bbl-gold bg-bbl-gold/20 text-bbl-gold"
                     : "border-bbl-border bg-bbl-card text-bbl-muted hover:border-bbl-primary hover:text-bbl-text"

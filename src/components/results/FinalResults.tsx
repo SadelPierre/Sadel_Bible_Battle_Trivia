@@ -8,6 +8,7 @@ import { rankPlayers } from "@/features/scoring/scoring";
 import { PLAYER_COLOR_STYLES } from "@/lib/playerColors";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
+import { CopyLabel } from "@/components/shared/CopyLabel";
 import { Confetti } from "./Confetti";
 import { BRAND } from "@/lib/branding";
 
@@ -120,7 +121,7 @@ export function FinalResults({
                 });
               }}
             >
-              {copied ? "Copied! ✓" : "📋 Copy results"}
+              <CopyLabel copied={copied} idle="📋 Copy results" done="Copied! ✓" />
             </Button>
             <Button variant="ghost" onClick={onHome}>
               🏠 Home

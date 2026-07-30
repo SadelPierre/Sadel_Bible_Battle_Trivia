@@ -1,13 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { RoomSnapshot } from "@/features/online/types";
 import { roomActions, type RoomCredentials } from "@/features/online/client";
 import { AVATAR_EMOJI, type GameSettings } from "@/types/game";
 import { PLAYER_COLOR_STYLES } from "@/lib/playerColors";
+import { DUR, EASE_OUT } from "@/lib/motion";
 import { Card } from "@/components/shared/Card";
 import { Button } from "@/components/shared/Button";
+import { CopyLabel } from "@/components/shared/CopyLabel";
 import { GameSettingsForm } from "@/components/settings/GameSettingsForm";
 import { CATEGORY_LABELS } from "@/types/game";
 
@@ -25,6 +27,10 @@ export function OnlineLobby({
   const [copied, setCopied] = useState<"code" | "link" | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const firstPaint = useRef(true);
+  useEffect(() => {
+    firstPaint.current = false;
+  }, []);
 
   const me = snapshot.players.find((p) => p.id === snapshot.myPlayerId);
   const isHost = snapshot.hostPlayerId === snapshot.myPlayerId;
@@ -61,10 +67,10 @@ export function OnlineLobby({
         </p>
         <div className="mt-3 flex flex-wrap justify-center gap-2">
           <Button variant="ghost" size="sm" onClick={() => copy("code", snapshot.code)}>
-            {copied === "code" ? "Copied ✓" : "📋 Copy code"}
+            <CopyLabel copied={copied === "code"} idle="📋 Copy code" />
           </Button>
           <Button variant="ghost" size="sm" onClick={() => copy("link", inviteLink)}>
-            {copied === "link" ? "Copied ✓" : "🔗 Copy invite link"}
+            <CopyLabel copied={copied === "link"} idle="🔗 Copy invite link" />
           </Button>
         </div>
       </Card>
@@ -74,50 +80,62 @@ export function OnlineLobby({
           Players ({snapshot.players.length}/{snapshot.maxPlayers})
         </h2>
         <div className="grid gap-2 sm:grid-cols-2">
-          {snapshot.players.map((p, i) => {
-            const c = PLAYER_COLOR_STYLES[p.color];
-            return (
-              <motion.div
-                key={p.id}
-                initial={{ opacity: 0, x: -16 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className={`flex items-center gap-2 rounded-xl border p-3 ${c.bg} ${c.border}`}
-              >
-                <span className="text-xl" aria-hidden>
-                  {AVATAR_EMOJI[p.avatar]}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className={`truncate text-sm font-bold ${c.text}`}>
-                    {p.name}
-                    {p.id === snapshot.myPlayerId && <span className="text-bbl-muted"> (you)</span>}
-                  </p>
-                  <p className="text-xs text-bbl-muted">
-                    {p.isHost && <span className="font-bold text-bbl-gold">👑 Host · </span>}
-                    {p.isBot ? (
-                      <span>🤖 {p.botDifficulty} bot</span>
-                    ) : p.connected ? (
-                      <span className="text-bbl-correct">● online</span>
-                    ) : (
-                      <span>○ away</span>
-                    )}
-                    {" · "}
-                    {p.isReady ? "✅ ready" : "…waiting"}
-                  </p>
-                </div>
-                {isHost && p.id !== snapshot.myPlayerId && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label={`Remove ${p.name}`}
-                    onClick={() => run(() => roomActions.removePlayer(snapshot.code, creds, p.id))}
-                  >
-                    ✕
-                  </Button>
-                )}
-              </motion.div>
-            );
-          })}
+          <AnimatePresence mode="popLayout" initial={false}>
+            {snapshot.players.map((p, i) => {
+              const c = PLAYER_COLOR_STYLES[p.color];
+              return (
+                <motion.div
+                  layout
+                  key={p.id}
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -16 }}
+                  transition={{
+                    duration: DUR.fast,
+                    ease: EASE_OUT,
+                    // Stagger the first paint only. A late joiner mounts on its
+                    // own and must not wait out the whole list before appearing.
+                    delay: firstPaint.current ? i * 0.05 : 0,
+                  }}
+                  className={`flex items-center gap-2 rounded-xl border p-3 ${c.bg} ${c.border}`}
+                >
+                  <span className="text-xl" aria-hidden>
+                    {AVATAR_EMOJI[p.avatar]}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className={`truncate text-sm font-bold ${c.text}`}>
+                      {p.name}
+                      {p.id === snapshot.myPlayerId && (
+                        <span className="text-bbl-muted"> (you)</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-bbl-muted">
+                      {p.isHost && <span className="font-bold text-bbl-gold">👑 Host · </span>}
+                      {p.isBot ? (
+                        <span>🤖 {p.botDifficulty} bot</span>
+                      ) : p.connected ? (
+                        <span className="text-bbl-correct">● online</span>
+                      ) : (
+                        <span>○ away</span>
+                      )}
+                      {" · "}
+                      {p.isReady ? "✅ ready" : "…waiting"}
+                    </p>
+                  </div>
+                  {isHost && p.id !== snapshot.myPlayerId && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      aria-label={`Remove ${p.name}`}
+                      onClick={() => run(() => roomActions.removePlayer(snapshot.code, creds, p.id))}
+                    >
+                      ✕
+                    </Button>
+                  )}
+                </motion.div>
+              );
+            })}
+          </AnimatePresence>
         </div>
 
         {isHost && snapshot.players.length < snapshot.maxPlayers && (
