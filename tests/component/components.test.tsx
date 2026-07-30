@@ -5,7 +5,11 @@ import { Scoreboard } from "@/components/game/Scoreboard";
 import { RevealPanel } from "@/components/game/RevealPanel";
 import { QuestionHeader } from "@/components/game/QuestionHeader";
 import { FinalResults } from "@/components/results/FinalResults";
+import { TournamentGameView } from "@/components/game/TournamentGameView";
+import { DEFAULT_SETTINGS } from "@/types/game";
 import type { AnswerRecord, BibleQuestion, GamePlayer, PlayerScoreState } from "@/types/game";
+import type { RoomSnapshot } from "@/features/online/types";
+import type { RoomCredentials } from "@/features/online/client";
 
 const question: BibleQuestion = {
   id: "t1",
@@ -148,5 +152,111 @@ describe("FinalResults", () => {
       />,
     );
     expect(screen.getByText(/It's a tie/)).toBeInTheDocument();
+  });
+});
+
+describe("TournamentGameView spectator controls", () => {
+  const creds: RoomCredentials = { playerId: "p1", token: "tok" };
+
+  /** A live field question with the requesting player already knocked out. */
+  const eliminatedSnapshot = (over: Partial<RoomSnapshot> = {}): RoomSnapshot => ({
+    roomId: "r1",
+    code: "ABCDE",
+    status: "playing",
+    gameMode: "tournament",
+    hostPlayerId: "p2",
+    maxPlayers: 30,
+    settings: DEFAULT_SETTINGS,
+    players: players.map((p) => ({
+      id: p.id,
+      name: p.name,
+      avatar: p.avatar,
+      color: p.color,
+      isHost: p.id === "p2",
+      isReady: true,
+      isBot: false,
+      connected: true,
+    })),
+    game: {
+      phase: "question",
+      settings: DEFAULT_SETTINGS,
+      currentIndex: 1,
+      questionCount: 10,
+      questionStartedAt: 0,
+      questionDeadline: null,
+      phaseEndsAt: null,
+      question,
+      revealed: false,
+      answeredIds: [],
+      myAnswerIndex: null,
+      scores: { p1: score(), p2: score() },
+      roundJustEnded: null,
+      winnerIds: null,
+      tournament: {
+        stage: "field",
+        survivorSchedule: [1],
+        survivorCount: 1,
+        nextCutTo: null,
+        eliminatedAtIndex: { p1: 0 },
+        duelWins: {},
+        championId: null,
+        meEliminated: true,
+      },
+    },
+    serverNow: 0,
+    version: 1,
+    myPlayerId: "p1",
+    ...over,
+  });
+
+  it("keeps spectating by default and never leaves without confirmation", () => {
+    const onLeft = vi.fn();
+    render(
+      <TournamentGameView
+        snapshot={eliminatedSnapshot()}
+        creds={creds}
+        refresh={async () => {}}
+        onLeft={onLeft}
+      />,
+    );
+    // still watching: the live question is on screen, no answer buttons
+    expect(screen.getByText(question.question)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Answer A/i })).not.toBeInTheDocument();
+
+    // one click arms the confirm, it must not leave outright
+    fireEvent.click(screen.getByRole("button", { name: /Leave tournament/i }));
+    expect(onLeft).not.toHaveBeenCalled();
+    expect(screen.getByText(/Leave for good\?/)).toBeInTheDocument();
+  });
+
+  it("leaves on confirm and backs out on 'Keep watching'", () => {
+    const onLeft = vi.fn();
+    render(
+      <TournamentGameView
+        snapshot={eliminatedSnapshot()}
+        creds={creds}
+        refresh={async () => {}}
+        onLeft={onLeft}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Leave tournament/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Keep watching/i }));
+    expect(onLeft).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: /Leave tournament/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Leave tournament/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Yes, leave/i }));
+    expect(onLeft).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers no leave control while you are still in the running", () => {
+    const snap = eliminatedSnapshot();
+    snap.game!.tournament!.meEliminated = false;
+    snap.game!.tournament!.eliminatedAtIndex = {};
+    render(
+      <TournamentGameView snapshot={snap} creds={creds} refresh={async () => {}} onLeft={vi.fn()} />,
+    );
+    expect(screen.queryByRole("button", { name: /Leave tournament/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Answer A/i })).toBeInTheDocument();
   });
 });

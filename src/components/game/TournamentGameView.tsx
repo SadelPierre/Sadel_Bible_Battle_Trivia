@@ -42,6 +42,10 @@ export function TournamentGameView({
   const toLocal = (serverTs: number | null) => (serverTs === null ? null : serverTs - offsetRef.current);
 
   const [pendingAnswer, setPendingAnswer] = useState<number | null>(null);
+  // Spectating is the default once you're knocked out; leaving is opt-in and
+  // two-step, because it deletes your seat and can't be undone from here.
+  const [confirmLeave, setConfirmLeave] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const lastPhase = useRef<string | null>(null);
   const wasEliminated = useRef(false);
 
@@ -135,8 +139,37 @@ export function TournamentGameView({
           transition={{ duration: DUR.panel, ease: EASE_OUT }}
           className="overflow-hidden"
         >
-          <Card className="border-bbl-incorrect/40 bg-bbl-incorrect/10 p-3 text-center text-sm font-semibold text-bbl-incorrect">
-            💀 You&apos;ve been eliminated — watching the rest as a spectator.
+          <Card className="border-bbl-incorrect/40 bg-bbl-incorrect/10 p-3 text-center">
+            <p className="text-sm font-semibold text-bbl-incorrect">
+              💀 You&apos;ve been eliminated — watching the rest as a spectator.
+            </p>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+              {confirmLeave ? (
+                <>
+                  <span className="text-xs text-bbl-muted">
+                    Leave for good?{isHost ? " Host passes to another player." : ""}
+                  </span>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    disabled={leaving}
+                    onClick={() => {
+                      setLeaving(true);
+                      onLeft();
+                    }}
+                  >
+                    Yes, leave
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => setConfirmLeave(false)}>
+                    Keep watching
+                  </Button>
+                </>
+              ) : (
+                <Button variant="ghost" size="sm" onClick={() => setConfirmLeave(true)}>
+                  🚪 Leave tournament
+                </Button>
+              )}
+            </div>
           </Card>
         </motion.div>
       )}
